@@ -92,7 +92,7 @@ export default function Login() {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-semibold py-3 rounded-md transition"
+                                className="w-full bg-[#FFC800] text-[#181A1B] font-semibold py-3 rounded-md transition-all duration-300 hover:bg-[#ffd84d] hover:shadow-[0_0_24px_rgba(255,200,0,0.45)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
                             >
                                 {processing ? 'Signing In...' : 'Sign In'}
                             </button>
@@ -100,13 +100,14 @@ export default function Login() {
 
                         {/* Register */}
                         <p className="text-center text-gray-400 text-sm mt-6">
-                            Don’t have an account?{' '}
+                            Don't have an account?{' '}
 
                             <Link
                                 href="/register"
-                                className="text-yellow-400 hover:underline"
+                                className="relative text-[#FFC800] font-medium transition-all duration-300 hover:text-[#ffd84d] group"
                             >
                                 Register
+                                <span className="absolute left-0 -bottom-0.5 w-0 h-[2px] bg-gradient-to-r from-[#FFC800] to-[#ffd84d] transition-all duration-300 group-hover:w-full" />
                             </Link>
                         </p>
                     </div>

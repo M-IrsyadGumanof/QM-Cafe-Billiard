@@ -140,9 +140,9 @@ export default function Register() {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="w-full h-[48px] rounded-lg bg-[#FFC800] text-[#181A1B] font-semibold transition hover:bg-[#ffd84d]"
+                                className="w-full h-[48px] rounded-lg bg-[#FFC800] text-[#181A1B] font-semibold transition-all duration-300 hover:bg-[#ffd84d] hover:shadow-[0_0_24px_rgba(255,200,0,0.45)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
                             >
-                                Create Account
+                                {processing ? 'Creating...' : 'Create Account'}
                             </button>
 
                         </form>
@@ -154,9 +154,10 @@ export default function Register() {
 
                             <Link
                                 href="/login"
-                                className="text-[#FFC800] hover:underline"
+                                className="relative text-[#FFC800] font-medium transition-all duration-300 hover:text-[#ffd84d] group"
                             >
                                 Sign In
+                                <span className="absolute left-0 -bottom-0.5 w-0 h-[2px] bg-gradient-to-r from-[#FFC800] to-[#ffd84d] transition-all duration-300 group-hover:w-full" />
                             </Link>
 
                         </p>
