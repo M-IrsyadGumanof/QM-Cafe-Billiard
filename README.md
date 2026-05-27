@@ -49,10 +49,10 @@ Proyek ini hadir sebagai solusi digital yang **efisien, akurat, dan mudah diguna
 
 | Komponen | Teknologi |
 |----------|-----------|
-| Backend Framework | Laravel 11.x |
-| Bahasa | PHP 8.2+ |
+| Backend Framework | Laravel 13.x |
+| Bahasa | PHP 8.4+ |
 | Database | MySQL 8.0 |
-| Frontend | Blade Template + Bootstrap |
+| Frontend | React + Tailwind |
 | Package Manager | Composer |
 | Version Control | Git & GitHub |
 | CI/CD | GitHub Actions |
@@ -122,7 +122,7 @@ php artisan serve
 | Muhammad Irsyad Gumanof | 2411082031 | Project Manager |
 | M. Galang Pratama | 2411081032 | System Analyst |
 | Suhafdal Zikri | 2411083018 | Lead Programmer |
-| Muhammad Ihqfal | 2411083013 | AI Specialist |
+| Muhammad Ihqfal | 2411083013 | Lead Programmer 2 |
 | Febriansyah Putra | 2411081030 | Quality Assurance |
 
 ---
