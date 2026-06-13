@@ -4,10 +4,11 @@
 ![PHP](https://img.shields.io/badge/PHP-8.3+-777BB4?logo=php&logoColor=white)
 ![React](https://img.shields.io/badge/React-18.2+-61DAFB?logo=react&logoColor=black)
 ![Status](https://img.shields.io/badge/Status-Dalam%20Pengembangan-F2C94C)
+[![CI](https://github.com/M-IrsyadGumanof/QM-Cafe-Billiard/actions/workflows/ci.yml/badge.svg)](https://github.com/M-IrsyadGumanof/QM-Cafe-Billiard/actions/workflows/ci.yml)
 
 Sistem informasi berbasis web untuk mendukung kegiatan operasional **QM Cafe & Billiard**, meliputi penyajian informasi usaha, pemesanan makanan dan minuman, reservasi meja billiard, verifikasi pembayaran, pemrosesan pesanan, pengelolaan ketersediaan meja, serta laporan bagi pemilik usaha.
 
-> **Status implementasi:** repository telah memuat fondasi aplikasi Laravel, Inertia, React, autentikasi dasar, dashboard, dan pengelolaan profil pengguna. Fitur bisnis QM Cafe & Billiard masih dikembangkan secara bertahap.
+> **Status implementasi:** repository telah memuat fondasi aplikasi Laravel, Inertia, React, autentikasi dasar, dashboard, pengelolaan profil pengguna, serta GitHub Actions CI untuk menjalankan test dan build otomatis. Fitur bisnis QM Cafe & Billiard masih dikembangkan secara bertahap.
 
 ---
 
@@ -99,6 +100,8 @@ Teknologi berikut mengacu pada konfigurasi repository pada branch `main`.
 | Code Style | Laravel Pint `^1.27` |
 | Database Default Development | SQLite pada `.env.example` |
 | Version Control | Git dan GitHub |
+| Continuous Integration | GitHub Actions (`.github/workflows/ci.yml`) |
+| Runtime CI | PHP `8.4`, Node.js `22`, SQLite testing |
 
 ---
 
@@ -156,6 +159,34 @@ Panduan instalasi lengkap, termasuk penggunaan MySQL dan troubleshooting, tersed
 
 ---
 
+## Continuous Integration
+
+Project ini menggunakan **GitHub Actions** untuk menjalankan quality check otomatis pada repository.
+
+Workflow CI berada pada:
+
+```text
+.github/workflows/ci.yml
+```
+
+Workflow berjalan otomatis pada:
+
+- `push` ke branch `main`, `develop`, dan branch anggota;
+- `pull_request` menuju `develop` dan `main`.
+
+Pemeriksaan yang dijalankan:
+
+```bash
+composer install
+npm ci
+php artisan migrate --force
+npm run build
+php artisan test
+```
+
+CI menggunakan PHP `8.4`, Node.js `22`, dan database SQLite untuk environment testing. Dokumentasi lengkap tersedia pada [`docs/github-actions.md`](docs/github-actions.md).
+
+
 ## Dokumentasi Proyek
 
 | Dokumen | Keterangan |
@@ -164,7 +195,7 @@ Panduan instalasi lengkap, termasuk penggunaan MySQL dan troubleshooting, tersed
 | [`docs/features.md`](docs/features.md) | Dokumentasi fitur aktual dan fitur yang direncanakan. |
 | [`docs/dependency.md`](docs/dependency.md) | Daftar dependency terpasang serta dependency rencana. |
 | [`docs/refactoring.md`](docs/refactoring.md) | Template dan riwayat refactoring saat final. |
-| [`docs/github-actions.md`](docs/github-actions.md) | Rencana dan bukti implementasi GitHub Actions/CI. |
+| [`docs/github-actions.md`](docs/github-actions.md) | Dokumentasi implementasi GitHub Actions/CI. |
 | [`CHANGELOG.md`](CHANGELOG.md) | Catatan perubahan proyek secara berkala. |
 
 ---
@@ -190,6 +221,9 @@ Screenshot aktual akan ditambahkan setelah halaman bisnis diimplementasikan dan 
 QM-Cafe-Billiard/
 ├── README.md
 ├── CHANGELOG.md
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 └── docs/
     ├── installation.md
     ├── features.md
@@ -207,7 +241,7 @@ QM-Cafe-Billiard/
 | Muhammad Irsyad Gumanof | 2411082031 | Project Manager |
 | M. Galang Pratama | 2411081032 | System Analyst |
 | Suhafdal Zikri | 2411083018 | Lead Programmer |
-| Muhammad Ihqfal | 2411083013 | AI Specialist |
+| Muhammad Ihqfal | 2411083013 | Lead Programmer 2 |
 | Febriansyah Putra | 2411081030 | Quality Assurance |
 
 ---

@@ -10,16 +10,38 @@ Format kategori yang digunakan: `Added`, `Changed`, `Fixed`, `Removed`, `Depende
 
 ## [Unreleased]
 
-### Planned
+### Added
+- Menambahkan workflow GitHub Actions CI pada `.github/workflows/ci.yml`.
+- Menambahkan quality check otomatis untuk dependency backend, dependency frontend, database migration, frontend build, dan Laravel test.
+- Menambahkan badge status CI pada `README.md`.
 
-- Implementasi homepage dan informasi publik QM Cafe & Billiard.
-- Implementasi role: Customer, Admin/Cashier, Kitchen Staff, Billiard Staff, dan Owner.
-- Implementasi menu serta pemesanan makanan/minuman untuk customer login.
-- Implementasi reservasi billiard Paket Regular dan Paket Personal.
-- Implementasi dashboard verifikasi pembayaran transfer/QRIS secara manual.
-- Implementasi Update Table Availability/Schedule.
-- Implementasi laporan dan statistik untuk Owner.
-- Implementasi workflow GitHub Actions/CI.
+### Fixed
+- Menyesuaikan workflow CI agar memakai PHP `8.4` sesuai kebutuhan dependency Composer.
+- Menyinkronkan `package-lock.json` agar `npm ci` berhasil pada GitHub Actions.
+- Menjalankan `npm run build` sebelum `php artisan test` agar Vite manifest tersedia ketika feature test merender halaman Inertia.
+
+### Documentation
+- Memperbarui `docs/github-actions.md` dari rencana implementasi menjadi dokumentasi workflow aktif.
+- Memperbarui `README.md` dengan badge CI dan ringkasan Continuous Integration.
+
+### Planned
+- Menambahkan fitur notifikasi durasi waktu main billiard hampir habis.
+- Menambahkan logika perhitungan sisa waktu sesi billiard.
+- Menampilkan notifikasi pada dashboard staf billiard ketika waktu bermain mendekati selesai.
+- Implementasi fitur Login & Registrasi
+- Setup struktur database (migrasi tabel awal)
+- Implementasi Homepage QM Biliard & Cafe
+- Implementasi pemesanan makanan via QR Code
+- Implementasi booking meja billiard
+- Implementasi panel admin
+- Implementasi sistem laporan otomatis
+
+### Impacted Modules
+- Billiard Session Module
+- Reservation Module
+- Notification Module
+- Staff Billiard Dashboard
+- Customer Notification Page
 
 ---
 
