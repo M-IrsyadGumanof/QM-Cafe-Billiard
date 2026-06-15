@@ -1,138 +1,76 @@
-import BilliardLayout from '@/Layouts/BilliardLayout';
-import { Link } from '@inertiajs/react';
+import BilliardLayout from "@/Layouts/BilliardLayout";
+import { money } from "@/Components/Shared/Format";
+import { Link } from "@inertiajs/react";
 
 export default function PersonalBilling({ reservation }) {
-    const totalPrice = Number(reservation.total_price).toLocaleString('id-ID');
+    const hourly = reservation.package?.price || 40000;
 
     return (
         <BilliardLayout>
-            <div className="space-y-6 max-w-3xl">
-                {/* Header */}
-                <div className="flex items-center gap-4">
-                    <Link
-                        href={route('billiard.reservations.show', reservation.id)}
-                        className="text-sm text-gray-500 hover:text-gray-700"
-                    >
-                        ← Kembali
-                    </Link>
-                    <h1 className="text-2xl font-bold text-gray-800">Personal Billing</h1>
+            {/* Header Banner */}
+            <div className="border-b border-[#222727] pb-6 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[#ffcc00]">
+                        Billing
+                    </p>
+                    <h1 className="mt-2 text-2xl font-black text-white md:text-3xl font-serif">
+                        Personal Package Billing
+                    </h1>
+                    <p className="mt-1 text-xs text-[#9aa7b3]">
+                        Detail tarif billing sewa meja billiard personal berdasarkan durasi bermain aktual.
+                    </p>
                 </div>
+                <Link
+                    href={`/billiard/reservations/${reservation.id}`}
+                    className="inline-flex items-center gap-2 rounded-xl border border-[#222727] bg-[#151919] px-4 py-2 text-xs font-bold uppercase tracking-widest text-sky-400 hover:border-sky-400/30 hover:bg-[#181d1d] transition-all duration-300"
+                >
+                    <svg className="h-4 w-4 text-[#ffcc00]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    KEMBALI
+                </Link>
+            </div>
 
-                {/* Billing Card */}
-                <div className="bg-white rounded-xl shadow overflow-hidden">
-                    {/* Card Header */}
-                    <div className="bg-gray-900 text-white px-6 py-5">
-                        <p className="text-xs text-gray-400 uppercase tracking-wide">Kode Reservasi</p>
-                        <p className="text-xl font-mono font-bold mt-1">{reservation.reservation_code}</p>
+            {/* Billing Card Container */}
+            <div className="mt-8 max-w-xl mx-auto">
+                <div className="rounded-[15px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-6 shadow-sm">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-5 border-b border-[#222727] pb-3">
+                        Rincian Billing Personal
+                    </h3>
+
+                    <div className="space-y-4 text-sm">
+                        <div className="flex justify-between">
+                            <span className="text-[#9aa7b3] font-bold">Kode Reservasi:</span>
+                            <span className="text-white font-mono font-extrabold">{reservation.reservation_code}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-[#9aa7b3] font-bold">Nama Pelanggan:</span>
+                            <span className="text-white font-extrabold">{reservation.user?.name || "Customer"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-[#9aa7b3] font-bold">Meja Billiard:</span>
+                            <span className="text-white font-extrabold">{reservation.table?.name || "N/A"}</span>
+                        </div>
+                        <div className="flex justify-between items-end border-t border-[#222727]/50 pt-4">
+                            <span className="text-[#9aa7b3] font-bold">Tarif Sewa (Per Jam):</span>
+                            <span className="text-2xl font-black text-[#ffcc00] font-sans">
+                                {money(hourly)} <span className="text-xs text-[#9aa7b3] font-bold">/ Jam</span>
+                            </span>
+                        </div>
                     </div>
 
-                    <div className="p-6 space-y-6">
-                        {/* Info Customer */}
-                        <div>
-                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                                Informasi Customer
-                            </h2>
-                            <div className="space-y-2">
-                                <InfoRow label="Nama" value={reservation.user?.name ?? '-'} />
-                                <InfoRow label="Email" value={reservation.user?.email ?? '-'} />
-                            </div>
-                        </div>
-
-                        <hr />
-
-                        {/* Info Meja & Paket */}
-                        <div>
-                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                                Meja & Paket
-                            </h2>
-                            <div className="space-y-2">
-                                <InfoRow label="Meja" value={reservation.table?.name ?? '-'} />
-                                <InfoRow label="Nomor Meja" value={reservation.table?.table_number ?? '-'} />
-                                <InfoRow label="Paket" value={reservation.package?.name ?? '-'} />
-                                <InfoRow label="Tipe Paket" value={reservation.package_type} />
-                            </div>
-                        </div>
-
-                        <hr />
-
-                        {/* Info Sesi */}
-                        <div>
-                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                                Detail Sesi
-                            </h2>
-                            <div className="space-y-2">
-                                <InfoRow label="Tanggal" value={reservation.reservation_date} />
-                                <InfoRow label="Jam Mulai" value={reservation.start_time} />
-                                <InfoRow label="Jam Selesai" value={reservation.end_time} />
-                                <InfoRow label="Durasi Rencana" value={`${reservation.duration_minutes} menit`} />
-                                {reservation.actual_start_time && (
-                                    <InfoRow label="Mulai Aktual" value={reservation.actual_start_time} />
-                                )}
-                                {reservation.actual_end_time && (
-                                    <InfoRow label="Selesai Aktual" value={reservation.actual_end_time} />
-                                )}
-                                {reservation.actual_duration_minutes && (
-                                    <InfoRow label="Durasi Aktual" value={`${reservation.actual_duration_minutes} menit`} />
-                                )}
-                            </div>
-                        </div>
-
-                        <hr />
-
-                        {/* Total Billing */}
-                        <div className="bg-gray-50 rounded-xl px-6 py-4 flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-500">Total Tagihan</p>
-                                <p className="text-xs text-gray-400 mt-0.5">
-                                    Status: <span className="font-medium">{reservation.payment_status}</span>
-                                </p>
-                            </div>
-                            <p className="text-2xl font-bold text-gray-800">
-                                Rp {totalPrice}
-                            </p>
-                        </div>
-
-                        {/* Catatan */}
-                        {reservation.notes && (
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                                <p className="text-sm font-medium text-yellow-700 mb-1">Catatan</p>
-                                <p className="text-sm text-yellow-600">{reservation.notes}</p>
-                            </div>
-                        )}
-
-                        {/* Status Badge */}
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm text-gray-500">Booking Status</p>
-                            <StatusBadge status={reservation.booking_status} />
+                    {/* Alert Info Box */}
+                    <div className="mt-6 p-4 rounded-xl bg-[#ffcc00]/5 border border-[#ffcc00]/10 flex items-start gap-3">
+                        <svg className="w-5 h-5 text-[#ffcc00] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div className="text-xs text-[#c7d0d8] leading-relaxed">
+                            <p className="font-bold text-white mb-0.5">Catatan Staf Billiard:</p>
+                            Untuk demo MVP ini, perhitungan durasi bermain aktual dapat dicatat dan dihitung manual oleh staf billiard saat pelanggan checkout dari meja.
                         </div>
                     </div>
                 </div>
             </div>
         </BilliardLayout>
-    );
-}
-
-function InfoRow({ label, value }) {
-    return (
-        <div className="flex justify-between text-sm">
-            <span className="text-gray-500">{label}</span>
-            <span className="font-medium text-gray-800">{value}</span>
-        </div>
-    );
-}
-
-function StatusBadge({ status }) {
-    const map = {
-        pending: 'bg-yellow-100 text-yellow-700',
-        confirmed: 'bg-blue-100 text-blue-700',
-        playing: 'bg-green-100 text-green-700',
-        completed: 'bg-gray-100 text-gray-700',
-        cancelled: 'bg-red-100 text-red-700',
-    };
-
-    return (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${map[status] ?? 'bg-gray-100 text-gray-600'}`}>
-            {status}
-        </span>
     );
 }

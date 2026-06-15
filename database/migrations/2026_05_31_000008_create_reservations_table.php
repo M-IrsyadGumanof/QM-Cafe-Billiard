@@ -10,21 +10,21 @@ return new class extends Migration
     {
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('billiard_table_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('billiard_package_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnUpdate();
+            $table->foreignId('billiard_table_id')->constrained()->cascadeOnUpdate();
+            $table->foreignId('billiard_package_id')->constrained()->cascadeOnUpdate();
             $table->string('reservation_code')->unique();
-            $table->string('package_type');
+            $table->string('package_type')->index();
             $table->date('reservation_date');
             $table->time('start_time');
-            $table->time('end_time');
-            $table->integer('duration_minutes');
-            $table->datetime('actual_start_time')->nullable();
-            $table->datetime('actual_end_time')->nullable();
-            $table->integer('actual_duration_minutes')->nullable();
-            $table->decimal('total_price', 10, 2)->default(0);
-            $table->string('booking_status')->default('pending');
-            $table->string('payment_status')->default('unpaid');
+            $table->time('end_time')->nullable();
+            $table->unsignedInteger('duration_minutes')->nullable();
+            $table->dateTime('actual_start_time')->nullable();
+            $table->dateTime('actual_end_time')->nullable();
+            $table->unsignedInteger('actual_duration_minutes')->nullable();
+            $table->unsignedInteger('total_price')->default(0);
+            $table->string('booking_status')->default('pending')->index();
+            $table->string('payment_status')->default('unpaid')->index();
             $table->text('notes')->nullable();
             $table->timestamps();
         });

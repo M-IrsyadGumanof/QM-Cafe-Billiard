@@ -5,43 +5,32 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\BilliardPackage;
 use App\Models\BilliardTable;
+use App\Models\QmNotification;
 use App\Models\Reservation;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ReservationController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
-        $reservations = Auth::user()
-            ->reservations()
-            ->with(['table', 'package'])
-            ->latest()
-            ->paginate(10);
-
         return Inertia::render('Customer/Reservations', [
-            'reservations' => $reservations,
+            'reservations' => auth()->user()->reservations()->with(['table','package'])->latest()->paginate(10),
         ]);
     }
 
-    public function create()
+    public function create(): Response
     {
-        $tables = BilliardTable::whereIn('status', ['available', 'reserved'])
-            ->orderBy('table_number')
-            ->get();
-
-        $packages = BilliardPackage::where('status', 'active')
-            ->orderBy('name')
-            ->get();
-
         return Inertia::render('Customer/ReservationCreate', [
-            'tables' => $tables,
-            'packages' => $packages,
+            'tables' => BilliardTable::whereIn('status',['available','reserved'])->orderBy('table_number')->get(),
+            'packages' => BilliardPackage::where('status','active')->orderBy('type')->get(),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'billiard_table_id' => 'required|exists:billiard_tables,id',
@@ -53,88 +42,61 @@ class ReservationController extends Controller
         ]);
 
         $table = BilliardTable::findOrFail($validated['billiard_table_id']);
-
-        if (in_array($table->status, ['occupied', 'maintenance'])) {
-            return back()->withErrors(['billiard_table_id' => 'Meja tidak tersedia.']);
-        }
+        abort_if(in_array($table->status, ['occupied','maintenance'], true), 422, 'Meja sedang tidak tersedia.');
 
         $package = BilliardPackage::findOrFail($validated['billiard_package_id']);
+        $duration = $package->type === 'regular' ? $package->duration_minutes : ($validated['duration_minutes'] ?? 60);
+        $start = Carbon::parse($validated['reservation_date'].' '.$validated['start_time']);
+        $end = $start->copy()->addMinutes($duration);
 
-        if ($package->type === 'regular') {
-            $duration = $package->duration_minutes;
-            $totalPrice = $package->price;
-            $paymentStatus = 'unpaid';
-        } else {
-            $duration = $validated['duration_minutes'] ?? 60;
-            $totalPrice = 0;
-            $paymentStatus = 'paid_after_play';
-        }
-
-        $startTime = \Carbon\Carbon::parse($validated['reservation_date'] . ' ' . $validated['start_time']);
-        $endTime = $startTime->copy()->addMinutes($duration);
-
-        // Cek konflik jadwal
-        $conflict = Reservation::where('billiard_table_id', $validated['billiard_table_id'])
+        $conflict = Reservation::where('billiard_table_id', $table->id)
             ->where('reservation_date', $validated['reservation_date'])
-            ->whereNotIn('booking_status', ['cancelled'])
-            ->where(function ($query) use ($startTime, $endTime) {
-                $query->whereBetween('start_time', [$startTime->format('H:i'), $endTime->format('H:i')])
-                    ->orWhereBetween('end_time', [$startTime->format('H:i'), $endTime->format('H:i')])
-                    ->orWhere(function ($q) use ($startTime, $endTime) {
-                        $q->where('start_time', '<=', $startTime->format('H:i'))
-                            ->where('end_time', '>=', $endTime->format('H:i'));
-                    });
-            })
-            ->exists();
+            ->whereNotIn('booking_status', ['cancelled','completed'])
+            ->where(function ($query) use ($validated, $end) {
+                $query->whereBetween('start_time', [$validated['start_time'], $end->format('H:i')])
+                    ->orWhereBetween('end_time', [$validated['start_time'], $end->format('H:i')]);
+            })->exists();
 
-        if ($conflict) {
-            return back()->withErrors(['start_time' => 'Jadwal meja sudah terisi pada waktu tersebut.']);
-        }
+        abort_if($conflict, 422, 'Jadwal meja bentrok dengan reservasi lain.');
 
-        Reservation::create([
-            'user_id' => Auth::id(),
-            'billiard_table_id' => $validated['billiard_table_id'],
-            'billiard_package_id' => $validated['billiard_package_id'],
+        $reservation = Reservation::create([
+            'user_id' => auth()->id(),
+            'billiard_table_id' => $table->id,
+            'billiard_package_id' => $package->id,
             'reservation_code' => $this->generateReservationCode(),
             'package_type' => $package->type,
             'reservation_date' => $validated['reservation_date'],
-            'start_time' => $startTime->format('H:i'),
-            'end_time' => $endTime->format('H:i'),
+            'start_time' => $validated['start_time'],
+            'end_time' => $end->format('H:i'),
             'duration_minutes' => $duration,
-            'total_price' => $totalPrice,
+            'total_price' => $package->type === 'regular' ? $package->price : 0,
             'booking_status' => 'pending',
-            'payment_status' => $paymentStatus,
+            'payment_status' => $package->type === 'personal' ? 'paid_after_play' : 'unpaid',
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        return redirect()->route('customer.reservations.index')
-            ->with('success', 'Reservasi berhasil dibuat.');
+        QmNotification::create([
+            'target_role' => 'admin',
+            'title' => 'New Reservation',
+            'message' => 'Reservasi '.$reservation->reservation_code.' menunggu pengecekan admin/cashier.',
+            'type' => 'reservation',
+        ]);
+
+        return redirect()->route('customer.reservations.show', $reservation)->with('success', 'Reservasi berhasil dibuat.');
     }
 
-    public function show(Reservation $reservation)
+    public function show(Reservation $reservation): Response
     {
-        if ($reservation->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $reservation->load(['table', 'package', 'payments']);
-
+        abort_unless($reservation->user_id === auth()->id(), 403);
         return Inertia::render('Customer/ReservationDetail', [
-            'reservation' => $reservation,
+            'reservation' => $reservation->load(['table','package','payments']),
         ]);
     }
 
     private function generateReservationCode(): string
     {
-        $date = now()->format('Ymd');
-        $prefix = 'RSV-' . $date . '-';
-
-        $last = Reservation::where('reservation_code', 'like', $prefix . '%')
-            ->orderBy('reservation_code', 'desc')
-            ->first();
-
-        $number = $last ? (int) substr($last->reservation_code, -4) + 1 : 1;
-
-        return $prefix . str_pad($number, 4, '0', STR_PAD_LEFT);
+        $prefix = 'RSV-'.now()->format('Ymd').'-';
+        $number = Reservation::where('reservation_code','like',$prefix.'%')->count() + 1;
+        return $prefix.str_pad((string)$number, 4, '0', STR_PAD_LEFT);
     }
 }

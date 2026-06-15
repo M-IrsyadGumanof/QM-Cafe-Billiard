@@ -1,254 +1,117 @@
+import CustomerLayout from "@/Layouts/CustomerLayout";
+import StatusBadge from "@/Components/Shared/StatusBadge";
+import { money, date } from "@/Components/Shared/Format";
 import { Link } from "@inertiajs/react";
 
-const STATUS_BOOKING = {
-    pending: {
-        label: "Pending",
-        className: "bg-yellow-100 text-yellow-800",
-    },
-    confirmed: {
-        label: "Confirmed",
-        className: "bg-blue-100 text-blue-800",
-    },
-    playing: {
-        label: "Playing",
-        className: "bg-green-100 text-green-800",
-    },
-    completed: {
-        label: "Completed",
-        className: "bg-gray-100 text-gray-800",
-    },
-    cancelled: {
-        label: "Cancelled",
-        className: "bg-red-100 text-red-800",
-    },
-};
-
-const STATUS_PAYMENT = {
-    unpaid: { label: "Unpaid", className: "bg-red-100 text-red-700" },
-    pending: { label: "Pending", className: "bg-yellow-100 text-yellow-700" },
-    verified: {
-        label: "Verified",
-        className: "bg-green-100 text-green-700",
-    },
-    rejected: {
-        label: "Rejected",
-        className: "bg-red-100 text-red-700",
-    },
-    paid_after_play: {
-        label: "Bayar Setelah Main",
-        className: "bg-purple-100 text-purple-700",
-    },
-};
-
-function StatusBadge({ map, value }) {
-    const entry = map[value] ?? {
-        label: value,
-        className: "bg-gray-100 text-gray-600",
-    };
-    return (
-        <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${entry.className}`}
-        >
-            {entry.label}
-        </span>
-    );
-}
-
 export default function Reservations({ reservations }) {
-    const { data, links, meta } = reservations;
-
+    const data = reservations?.data || [];
     return (
-        <div className="p-6">
+        <CustomerLayout>
             {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[#222727] pb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">
-                        Reservasi Saya
+                    <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[#ffcc00]">
+                        Reservasi Meja
+                    </p>
+                    <h1 className="mt-2 text-2xl font-black text-white md:text-3xl font-serif">
+                        Riwayat Reservasi Anda
                     </h1>
-                    <p className="mt-1 text-sm text-gray-500">
-                        Riwayat dan status semua reservasi meja billiard Anda.
+                    <p className="mt-1 text-xs text-[#9aa7b3] max-w-xl">
+                        Pantau status pesanan meja billiard, jadwal bermain, serta detail pembayaran Anda di sini.
                     </p>
                 </div>
-                <Link
-                    href={route("customer.reservations.create")}
-                    className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                    <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 4.5v15m7.5-7.5h-15"
-                        />
-                    </svg>
-                    Buat Reservasi
-                </Link>
-            </div>
-
-            {/* Table */}
-            {data.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center">
-                    <svg
-                        className="mx-auto h-12 w-12 text-gray-300"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-                        />
-                    </svg>
-                    <p className="mt-4 text-sm font-medium text-gray-500">
-                        Belum ada reservasi
-                    </p>
-                    <p className="mt-1 text-sm text-gray-400">
-                        Mulai buat reservasi meja billiard pertama Anda.
-                    </p>
+                <div className="flex flex-wrap gap-2 shrink-0 self-start sm:self-center">
                     <Link
-                        href={route("customer.reservations.create")}
-                        className="mt-4 inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        href="/customer/reservations/create"
+                        className="rounded-[10px] bg-[#ffcc00] px-4 py-2.5 text-xs font-bold text-[#151919] hover:bg-[#e6b800] transition-all duration-200 shadow-md shadow-black/20"
                     >
-                        Buat Sekarang
+                        + Reservasi Baru
                     </Link>
                 </div>
-            ) : (
-                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    {[
-                                        "Kode",
-                                        "Meja",
-                                        "Paket",
-                                        "Tanggal",
-                                        "Jam",
-                                        "Status Booking",
-                                        "Status Pembayaran",
-                                        "",
-                                    ].map((h) => (
-                                        <th
-                                            key={h}
-                                            className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
-                                        >
-                                            {h}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100 bg-white">
-                                {data.map((res) => (
-                                    <tr
-                                        key={res.id}
-                                        className="transition-colors hover:bg-gray-50"
-                                    >
-                                        <td className="px-4 py-3">
-                                            <span className="font-mono text-sm font-semibold text-gray-800">
-                                                {res.reservation_code}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-700">
-                                            <div className="font-medium">
-                                                {res.table?.name ?? "-"}
-                                            </div>
-                                            <div className="text-xs text-gray-400">
-                                                Meja {res.table?.table_number}
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-700">
-                                            <div className="font-medium">
-                                                {res.package?.name ?? "-"}
-                                            </div>
-                                            <div className="text-xs capitalize text-gray-400">
-                                                {res.package_type}
-                                            </div>
-                                        </td>
-                                        <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700">
-                                            {res.reservation_date
-                                                ? new Date(
-                                                      res.reservation_date
-                                                  ).toLocaleDateString("id-ID", {
-                                                      day: "numeric",
-                                                      month: "short",
-                                                      year: "numeric",
-                                                  })
-                                                : "-"}
-                                        </td>
-                                        <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700">
-                                            {res.start_time
-                                                ? res.start_time.slice(0, 5)
-                                                : "-"}
-                                            {res.end_time
-                                                ? ` – ${res.end_time.slice(0, 5)}`
-                                                : ""}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <StatusBadge
-                                                map={STATUS_BOOKING}
-                                                value={res.booking_status}
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <StatusBadge
-                                                map={STATUS_PAYMENT}
-                                                value={res.payment_status}
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3 text-right">
-                                            <Link
-                                                href={route(
-                                                    "customer.reservations.show",
-                                                    res.id
-                                                )}
-                                                className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                                            >
-                                                Detail →
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+            </div>
 
-                    {/* Pagination */}
-                    {links && links.length > 3 && (
-                        <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
-                            <p className="text-sm text-gray-500">
-                                {meta?.from ?? "-"} – {meta?.to ?? "-"} dari{" "}
-                                {meta?.total ?? "-"} reservasi
-                            </p>
-                            <div className="flex gap-1">
-                                {links.map((link, i) => (
-                                    <Link
-                                        key={i}
-                                        href={link.url ?? "#"}
-                                        preserveScroll
-                                        className={`rounded px-3 py-1 text-sm ${
-                                            link.active
-                                                ? "bg-blue-600 font-semibold text-white"
-                                                : link.url
-                                                  ? "text-gray-600 hover:bg-gray-100"
-                                                  : "cursor-not-allowed text-gray-300"
-                                        }`}
-                                        dangerouslySetInnerHTML={{
-                                            __html: link.label,
-                                        }}
-                                    />
-                                ))}
+            {/* List */}
+            <div className="mt-8 grid gap-4">
+                {data.length > 0 ? (
+                    data.map((r) => (
+                        <Link
+                            href={`/customer/reservations/${r.id}`}
+                            key={r.id}
+                            className="group relative rounded-[15px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-5 transition-all duration-300 hover:border-[#ffcc00]/20 hover:shadow-lg hover:-translate-y-0.5"
+                        >
+                            <div className="grid grid-cols-1 md:grid-cols-[1fr_200px_120px] items-center gap-4">
+                                <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6 min-w-0">
+                                    {/* Visual Icon */}
+                                    <div className="hidden h-12 w-12 shrink-0 rounded-xl bg-[#ffcc00]/5 border border-[#ffcc00]/10 items-center justify-center text-[#ffcc00] md:flex">
+                                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+
+                                    <div className="space-y-1 min-w-0">
+                                        <div className="flex items-center gap-2.5">
+                                            <span className="font-mono text-sm font-black text-[#ffcc00] tracking-wide">
+                                                {r.reservation_code}
+                                            </span>
+                                            <span className="text-[10px] font-bold text-[#5b6e6e] uppercase tracking-wider">
+                                                • {date(r.reservation_date)}
+                                            </span>
+                                        </div>
+                                        <h3 className="text-base font-extrabold text-white truncate">
+                                            Meja {r.table?.name || "N/A"}
+                                        </h3>
+                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#9aa7b3]">
+                                            <span>Paket: <strong className="text-[#c7d0d8] font-bold">{r.package?.name || "Biasa"}</strong></span>
+                                            <span className="text-[#2b3232]">•</span>
+                                            <span>Waktu: <strong className="text-[#c7d0d8] font-mono">{r.start_time?.substring(0, 5)} - {r.end_time?.substring(0, 5) || "Selesai"}</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-4 border-t border-[#222727] pt-4 md:mt-0 md:border-0 md:pt-0">
+                                    <table className="text-[10px] font-bold text-[#5b6e6e] uppercase tracking-wider w-full md:w-[240px]" style={{ borderSpacing: "0 4px", borderCollapse: "separate" }}>
+                                        <tbody>
+                                            <tr>
+                                                <td className="w-20" style={{ paddingRight: "8px", whiteSpace: "nowrap" }}>Booking:</td>
+                                                <td><StatusBadge value={r.booking_status} /></td>
+                                            </tr>
+                                            <tr>
+                                                <td className="w-20" style={{ paddingRight: "8px", whiteSpace: "nowrap" }}>Bayar:</td>
+                                                <td><StatusBadge value={r.payment_status} /></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div className="mt-2 text-left md:text-right md:mt-0">
+                                    <span className="text-sm font-bold text-[#5b6e6e] block md:hidden">Total Biaya:</span>
+                                    <span className="text-lg font-black text-[#ffcc00] tracking-tight md:text-xl font-sans">
+                                        {money(r.total_price)}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </div>
-            )}
-        </div>
+                        </Link>
+                    ))
+                ) : (
+                    <div className="rounded-[15px] border border-dashed border-[#222727] p-12 text-center bg-[#151919]/20">
+                        <svg className="mx-auto h-12 w-12 text-[#5b6e6e]/60 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <h3 className="font-extrabold text-white mb-1">Belum Ada Reservasi</h3>
+                        <p className="text-xs text-[#9aa7b3] mb-5 max-w-sm mx-auto">
+                            Anda belum pernah melakukan reservasi meja billiard. Ingin mencoba sekarang?
+                        </p>
+                        <Link
+                            href="/customer/reservations/create"
+                            className="inline-block rounded-[10px] bg-[#ffcc00] px-5 py-2.5 text-xs font-bold text-[#151919] hover:bg-[#e6b800] transition-all duration-200"
+                        >
+                            Buat Reservasi Baru
+                        </Link>
+                    </div>
+                )}
+            </div>
+        </CustomerLayout>
     );
 }
+
+    

@@ -1,200 +1,204 @@
-import { useState } from 'react';
-import { useForm } from '@inertiajs/react';
+import AdminLayout from "@/Layouts/AdminLayout";
+import StatusBadge from "@/Components/Shared/StatusBadge";
+import { useForm, router } from "@inertiajs/react";
+import { useState } from "react";
 
 export default function BilliardTables({ tables }) {
-    const [showModal, setShowModal] = useState(false);
-    const [editData, setEditData] = useState(null);
+    const rows = tables?.data || [];
+    const [editingId, setEditingId] = useState(null);
 
-    const { data, setData, post, patch, delete: destroy, processing, errors, reset } = useForm({
-        table_number: '',
-        name: '',
-        status: 'available',
-        description: '',
+    const f = useForm({
+        table_number: "",
+        name: "",
+        status: "available",
+        description: "",
     });
 
-    const openAdd = () => {
-        reset();
-        setEditData(null);
-        setShowModal(true);
-    };
-
-    const openEdit = (table) => {
-        setData({
-            table_number: table.table_number,
-            name: table.name,
-            status: table.status,
-            description: table.description ?? '',
-        });
-        setEditData(table);
-        setShowModal(true);
-    };
-
-    const handleSubmit = (e) => {
+    const submit = (e) => {
         e.preventDefault();
-        if (editData) {
-            patch(route('admin.billiard-tables.update', editData.id), {
-                onSuccess: () => { setShowModal(false); reset(); },
+
+        if (editingId) {
+            f.patch(`/admin/billiard-tables/${editingId}`, {
+                onSuccess: () => {
+                    setEditingId(null);
+                    f.reset();
+                }
             });
-        } else {
-            post(route('admin.billiard-tables.store'), {
-                onSuccess: () => { setShowModal(false); reset(); },
-            });
+            return;
         }
+
+        f.post("/admin/billiard-tables", {
+            onSuccess: () => f.reset()
+        });
     };
 
-    const handleDelete = (table) => {
-        if (confirm(`Hapus meja ${table.name}?`)) {
-            destroy(route('admin.billiard-tables.destroy', table.id));
+    const startEdit = (t) => {
+        setEditingId(t.id);
+        f.setData({
+            table_number: t.table_number,
+            name: t.name,
+            status: t.status,
+            description: t.description || "",
+        });
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+        f.reset();
+    };
+
+    const handleDelete = (id) => {
+        if (confirm("Apakah Anda yakin ingin menghapus meja billiard ini?")) {
+            router.delete(`/admin/billiard-tables/${id}`);
         }
     };
 
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-gray-800">Billiard Tables</h1>
-                <button
-                    onClick={openAdd}
-                    className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
-                >
-                    + Tambah Meja
-                </button>
+        <AdminLayout>
+            {/* Header */}
+            <div className="flex flex-col gap-2 border-b border-[#222727] pb-6">
+                <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[#ffcc00]">
+                    Billiard & Café
+                </p>
+                <h1 className="text-2xl font-black text-white md:text-3xl font-serif">
+                    Manajemen Meja Billiard
+                </h1>
+                <p className="text-xs text-[#9aa7b3]">
+                    Kelola meja billiard yang terdaftar di sistem, atur status (Tersedia, Terbooking, Digunakan, Perawatan).
+                </p>
             </div>
 
-            {/* Tabel */}
-            <div className="bg-white rounded-xl shadow overflow-hidden">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-                        <tr>
-                            <th className="px-6 py-3 text-left">No. Meja</th>
-                            <th className="px-6 py-3 text-left">Nama</th>
-                            <th className="px-6 py-3 text-left">Status</th>
-                            <th className="px-6 py-3 text-left">Deskripsi</th>
-                            <th className="px-6 py-3 text-left">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {tables.data.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} className="px-6 py-8 text-center text-gray-400">
-                                    Belum ada meja.
-                                </td>
-                            </tr>
-                        ) : (
-                            tables.data.map((table) => (
-                                <tr key={table.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 font-mono">{table.table_number}</td>
-                                    <td className="px-6 py-4">{table.name}</td>
-                                    <td className="px-6 py-4">
-                                        <StatusBadge status={table.status} />
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-500">{table.description ?? '-'}</td>
-                                    <td className="px-6 py-4 flex gap-3">
-                                        <button
-                                            onClick={() => openEdit(table)}
-                                            className="text-blue-600 hover:underline text-sm"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(table)}
-                                            className="text-red-600 hover:underline text-sm"
-                                        >
-                                            Hapus
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Modal */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-                        <h2 className="text-lg font-semibold text-gray-800">
-                            {editData ? 'Edit Meja' : 'Tambah Meja'}
-                        </h2>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nomor Meja</label>
-                                <input
-                                    type="text"
-                                    value={data.table_number}
-                                    onChange={(e) => setData('table_number', e.target.value)}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                                {errors.table_number && <p className="text-red-500 text-xs mt-1">{errors.table_number}</p>}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-                                <input
-                                    type="text"
-                                    value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                <select
-                                    value={data.status}
-                                    onChange={(e) => setData('status', e.target.value)}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="available">Available</option>
-                                    <option value="reserved">Reserved</option>
-                                    <option value="occupied">Occupied</option>
-                                    <option value="maintenance">Maintenance</option>
-                                </select>
-                                {errors.status && <p className="text-red-500 text-xs mt-1">{errors.status}</p>}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                                <textarea
-                                    value={data.description}
-                                    onChange={(e) => setData('description', e.target.value)}
-                                    rows={3}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-                            <div className="flex justify-end gap-3 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowModal(false)}
-                                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
-                                >
-                                    Batal
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                                >
-                                    {processing ? 'Menyimpan...' : 'Simpan'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+            {/* Form Section */}
+            <section className="mt-8 rounded-[15px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-6 shadow-md">
+                <div className="flex items-center justify-between gap-3 border-b border-[#222727] pb-4">
+                    <h2 className="text-sm font-extrabold text-white tracking-wide">
+                        {editingId ? "Edit Meja Billiard" : "Tambah Meja Baru"}
+                    </h2>
+                    {editingId && (
+                        <button
+                            type="button"
+                            onClick={cancelEdit}
+                            className="rounded-[10px] border border-[#222727] bg-[#151919] px-3.5 py-1.5 text-xs font-bold text-[#9aa7b3] hover:border-red-500/30 hover:text-red-400 transition-all duration-200"
+                        >
+                            Batal
+                        </button>
+                    )}
                 </div>
-            )}
-        </div>
-    );
-}
 
-function StatusBadge({ status }) {
-    const map = {
-        available: 'bg-green-100 text-green-700',
-        reserved: 'bg-blue-100 text-blue-700',
-        occupied: 'bg-yellow-100 text-yellow-700',
-        maintenance: 'bg-red-100 text-red-700',
-    };
+                <form onSubmit={submit} className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <div className="flex flex-col">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#9aa7b3]">Nomor Meja</span>
+                        <input
+                            type="text"
+                            placeholder="Contoh: 01"
+                            value={f.data.table_number}
+                            onChange={(e) => f.setData("table_number", e.target.value)}
+                            className="mt-2.5 w-full rounded-[10px] border border-[#222727] bg-[#151919] px-4 py-3 text-sm text-white focus:border-[#ffcc00] focus:outline-none transition-all duration-200"
+                            required
+                        />
+                        {f.errors.table_number && <p className="mt-1 text-xs text-red-400">{f.errors.table_number}</p>}
+                    </div>
 
-    return (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${map[status] ?? 'bg-gray-100 text-gray-600'}`}>
-            {status}
-        </span>
+                    <div className="flex flex-col">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#9aa7b3]">Nama / Kode Meja</span>
+                        <input
+                            type="text"
+                            placeholder="Contoh: Meja Standar A"
+                            value={f.data.name}
+                            onChange={(e) => f.setData("name", e.target.value)}
+                            className="mt-2.5 w-full rounded-[10px] border border-[#222727] bg-[#151919] px-4 py-3 text-sm text-white focus:border-[#ffcc00] focus:outline-none transition-all duration-200"
+                            required
+                        />
+                        {f.errors.name && <p className="mt-1 text-xs text-red-400">{f.errors.name}</p>}
+                    </div>
+
+                    <div className="flex flex-col">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#9aa7b3]">Status Meja</span>
+                        <select
+                            value={f.data.status}
+                            onChange={(e) => f.setData("status", e.target.value)}
+                            className="mt-2.5 w-full rounded-[10px] border border-[#222727] bg-[#151919] px-4 py-3 text-sm text-white focus:border-[#ffcc00] focus:outline-none transition-all duration-200"
+                            required
+                        >
+                            <option value="available">Tersedia (Available)</option>
+                            <option value="reserved">Terbooking (Reserved)</option>
+                            <option value="occupied">Digunakan (Occupied)</option>
+                            <option value="maintenance">Perawatan (Maintenance)</option>
+                        </select>
+                        {f.errors.status && <p className="mt-1 text-xs text-red-400">{f.errors.status}</p>}
+                    </div>
+
+                    <div className="flex flex-col">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#9aa7b3]">Keterangan</span>
+                        <input
+                            type="text"
+                            placeholder="Contoh: Meja ukuran 9 feet"
+                            value={f.data.description}
+                            onChange={(e) => f.setData("description", e.target.value)}
+                            className="mt-2.5 w-full rounded-[10px] border border-[#222727] bg-[#151919] px-4 py-3 text-sm text-white focus:border-[#ffcc00] focus:outline-none transition-all duration-200"
+                        />
+                        {f.errors.description && <p className="mt-1 text-xs text-red-400">{f.errors.description}</p>}
+                    </div>
+
+                    <div className="md:col-span-2 lg:col-span-4 mt-2">
+                        <button
+                            type="submit"
+                            disabled={f.processing}
+                            className="w-full rounded-[10px] bg-[#ffcc00] px-5 py-3 text-xs font-bold text-[#151919] hover:bg-[#e6b800] active:scale-[0.98] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 shadow-md shadow-black/20"
+                        >
+                            {editingId ? "Simpan Perubahan Meja" : "Tambah Meja Billiard"}
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            {/* List Section */}
+            <div className="mt-8 border-b border-[#222727] pb-3">
+                <h3 className="text-base font-extrabold text-white tracking-wide">Daftar Meja Billiard</h3>
+            </div>
+
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {rows.length > 0 ? (
+                    rows.map((t) => (
+                        <div
+                            key={t.id}
+                            className="group relative flex flex-col justify-between rounded-[15px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-5 transition-all duration-300 hover:border-[#ffcc00]/10 hover:shadow-lg"
+                        >
+                            <div>
+                                <div className="flex justify-between items-start gap-3">
+                                    <div>
+                                        <span className="font-mono text-xs font-bold text-[#5b6e6e] block mb-0.5">MEJA #{t.table_number}</span>
+                                        <h3 className="font-extrabold text-base text-white tracking-wide">{t.name}</h3>
+                                    </div>
+                                    <StatusBadge value={t.status} />
+                                </div>
+                                <p className="mt-3 text-xs text-[#9aa7b3] leading-relaxed">
+                                    {t.description || "Tidak ada rincian keterangan meja."}
+                                </p>
+                            </div>
+
+                            <div className="mt-5 pt-4 border-t border-[#222727] flex gap-2.5">
+                                <button
+                                    onClick={() => startEdit(t)}
+                                    className="flex-1 rounded-[10px] border border-[#222727] bg-[#151919] px-4 py-2 text-xs font-bold text-[#9aa7b3] hover:border-[#ffcc00]/25 hover:text-white transition-all duration-200"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(t.id)}
+                                    className="rounded-[10px] border border-red-500/20 bg-red-500/5 px-4 py-2 text-xs font-bold text-red-400 hover:bg-red-500/15 transition-all duration-200"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="col-span-full rounded-[15px] border border-dashed border-[#222727] p-12 text-center bg-[#151919]/20 text-sm text-[#9aa7b3]">
+                        Belum ada meja billiard terdaftar.
+                    </div>
+                )}
+            </div>
+        </AdminLayout>
     );
 }

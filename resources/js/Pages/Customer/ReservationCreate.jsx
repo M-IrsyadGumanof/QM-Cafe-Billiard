@@ -1,384 +1,211 @@
-import { useForm, Link } from "@inertiajs/react";
+import CustomerLayout from "@/Layouts/CustomerLayout";
+import { useForm } from "@inertiajs/react";
+import { money } from "@/Components/Shared/Format";
 
 export default function ReservationCreate({ tables, packages }) {
     const { data, setData, post, processing, errors } = useForm({
-        billiard_table_id: "",
-        billiard_package_id: "",
-        reservation_date: "",
-        start_time: "",
-        duration_minutes: "60",
+        billiard_table_id: tables?.[0]?.id || "",
+        billiard_package_id: packages?.[0]?.id || "",
+        reservation_date: new Date().toISOString().slice(0, 10),
+        start_time: "19:00",
+        duration_minutes: packages?.[0]?.type === "regular" ? packages?.[0]?.duration_minutes : 60,
         notes: "",
     });
 
-    // Paket yang dipilih saat ini
-    const selectedPackage = packages.find(
-        (p) => String(p.id) === String(data.billiard_package_id)
-    );
-    const isPersonal = selectedPackage?.type === "personal";
+    const pkg = (packages || []).find((p) => p.id == data.billiard_package_id);
 
-    function handleSubmit(e) {
+    const calculateEndTime = (startTime, durationMinutes) => {
+        if (!startTime || !durationMinutes) return "";
+        const [hours, minutes] = startTime.split(":").map(Number);
+        const dateObj = new Date();
+        dateObj.setHours(hours, minutes, 0, 0);
+        dateObj.setMinutes(dateObj.getMinutes() + Number(durationMinutes));
+        const endHours = String(dateObj.getHours()).padStart(2, "0");
+        const endMinutes = String(dateObj.getMinutes()).padStart(2, "0");
+        return `${endHours}:${endMinutes}`;
+    };
+
+    const handlePackageChange = (packageId) => {
+        const selectedPkg = (packages || []).find((p) => p.id == packageId);
+        setData({
+            ...data,
+            billiard_package_id: packageId,
+            duration_minutes: selectedPkg?.type === "regular" ? selectedPkg.duration_minutes : 60,
+        });
+    };
+
+    const submit = (e) => {
         e.preventDefault();
-        post(route("customer.reservations.store"));
-    }
+        post("/customer/reservations");
+    };
 
     return (
-        <div className="p-6">
-            {/* Header */}
-            <div className="mb-6">
-                <div className="mb-2 flex items-center gap-2 text-sm text-gray-500">
-                    <Link
-                        href={route("customer.reservations.index")}
-                        className="hover:text-blue-600"
-                    >
-                        Reservasi Saya
-                    </Link>
-                    <span>/</span>
-                    <span className="text-gray-700">Buat Reservasi</span>
-                </div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                    Buat Reservasi Baru
+        <CustomerLayout>
+            <div className="flex flex-col gap-2 border-b border-[#222727] pb-6">
+                <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[#ffcc00]">
+                    Reservasi Baru
+                </p>
+                <h1 className="text-2xl font-black text-white md:text-3xl font-serif">
+                    Formulir Reservasi Meja
                 </h1>
-                <p className="mt-1 text-sm text-gray-500">
-                    Pilih meja dan paket yang tersedia, lalu tentukan jadwal
-                    bermain.
+                <p className="text-xs text-[#9aa7b3]">
+                    Silakan tentukan paket, meja, tanggal, dan jam mulai bermain billiard Anda.
                 </p>
             </div>
 
             <form
-                onSubmit={handleSubmit}
-                className="mx-auto max-w-2xl space-y-6"
+                onSubmit={submit}
+                className="mt-8 grid gap-6 rounded-[15px] border border-[#222727] bg-gradient-to-b from-[#151919] to-[#111515] p-6 md:grid-cols-2 shadow-lg"
             >
-                {/* Pilih Meja */}
-                <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
-                        Pilih Meja
-                    </h2>
-                    <div>
-                        <label
-                            htmlFor="billiard_table_id"
-                            className="mb-1 block text-sm font-medium text-gray-700"
-                        >
-                            Meja Billiard{" "}
-                            <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            id="billiard_table_id"
-                            value={data.billiard_table_id}
-                            onChange={(e) =>
-                                setData("billiard_table_id", e.target.value)
-                            }
-                            className={`w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                errors.billiard_table_id
-                                    ? "border-red-400 bg-red-50"
-                                    : "border-gray-300"
-                            }`}
-                        >
-                            <option value="">-- Pilih Meja --</option>
-                            {tables.map((t) => (
-                                <option
-                                    key={t.id}
-                                    value={t.id}
-                                    disabled={t.status !== "available"}
-                                >
-                                    Meja {t.table_number} – {t.name}
-                                    {t.status !== "available"
-                                        ? ` (${t.status})`
-                                        : ""}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.billiard_table_id && (
-                            <p className="mt-1 text-xs text-red-500">
-                                {errors.billiard_table_id}
-                            </p>
-                        )}
-                        <p className="mt-1 text-xs text-gray-400">
-                            Hanya meja berstatus{" "}
-                            <span className="font-medium text-green-600">
-                                available
-                            </span>{" "}
-                            yang dapat dipilih.
-                        </p>
-                    </div>
-                </div>
-
-                {/* Pilih Paket */}
-                <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
-                        Pilih Paket
-                    </h2>
-
-                    {packages.length === 0 ? (
-                        <p className="text-sm text-gray-400">
-                            Tidak ada paket aktif tersedia.
-                        </p>
-                    ) : (
-                        <div className="space-y-3">
-                            {packages.map((pkg) => (
-                                <label
-                                    key={pkg.id}
-                                    className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
-                                        String(data.billiard_package_id) ===
-                                        String(pkg.id)
-                                            ? "border-blue-500 bg-blue-50"
-                                            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                                    }`}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="billiard_package_id"
-                                        value={pkg.id}
-                                        checked={
-                                            String(data.billiard_package_id) ===
-                                            String(pkg.id)
-                                        }
-                                        onChange={(e) =>
-                                            setData(
-                                                "billiard_package_id",
-                                                e.target.value
-                                            )
-                                        }
-                                        className="mt-0.5 accent-blue-600"
-                                    />
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm font-semibold text-gray-800">
-                                                {pkg.name}
-                                            </span>
-                                            <span
-                                                className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
-                                                    pkg.type === "personal"
-                                                        ? "bg-purple-100 text-purple-700"
-                                                        : "bg-green-100 text-green-700"
-                                                }`}
-                                            >
-                                                {pkg.type}
-                                            </span>
-                                        </div>
-                                        <p className="mt-0.5 text-xs text-gray-500">
-                                            {pkg.type === "regular"
-                                                ? `${pkg.duration_minutes} menit · Rp ${Number(pkg.price).toLocaleString("id-ID")}`
-                                                : "Durasi fleksibel · Bayar setelah main"}
-                                        </p>
-                                        {pkg.description && (
-                                            <p className="mt-1 text-xs text-gray-400">
-                                                {pkg.description}
-                                            </p>
-                                        )}
-                                    </div>
-                                </label>
-                            ))}
-                        </div>
-                    )}
-
+                <div className="flex flex-col">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#9aa7b3]">
+                        Paket Bermain
+                    </span>
+                    <select
+                        value={data.billiard_package_id}
+                        onChange={(e) => handlePackageChange(e.target.value)}
+                        className="mt-2 w-full rounded-[10px] border border-[#222727] bg-[#151919] px-4 py-3 text-sm text-white focus:border-[#ffcc00] focus:outline-none transition-all duration-200"
+                    >
+                        {(packages || []).map((p) => (
+                            <option key={p.id} value={p.id}>
+                                {p.name} ({p.type === "regular" ? "Reguler" : "Personal"})
+                            </option>
+                        ))}
+                    </select>
                     {errors.billiard_package_id && (
-                        <p className="mt-2 text-xs text-red-500">
+                        <p className="mt-1.5 text-xs font-bold text-red-400">
                             {errors.billiard_package_id}
                         </p>
                     )}
                 </div>
 
-                {/* Jadwal */}
-                <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
-                        Jadwal Bermain
-                    </h2>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        {/* Tanggal */}
-                        <div>
-                            <label
-                                htmlFor="reservation_date"
-                                className="mb-1 block text-sm font-medium text-gray-700"
-                            >
-                                Tanggal <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="date"
-                                id="reservation_date"
-                                value={data.reservation_date}
-                                min={new Date().toISOString().split("T")[0]}
-                                onChange={(e) =>
-                                    setData("reservation_date", e.target.value)
-                                }
-                                className={`w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                    errors.reservation_date
-                                        ? "border-red-400 bg-red-50"
-                                        : "border-gray-300"
-                                }`}
-                            />
-                            {errors.reservation_date && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.reservation_date}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Jam Mulai */}
-                        <div>
-                            <label
-                                htmlFor="start_time"
-                                className="mb-1 block text-sm font-medium text-gray-700"
-                            >
-                                Jam Mulai <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="time"
-                                id="start_time"
-                                value={data.start_time}
-                                onChange={(e) =>
-                                    setData("start_time", e.target.value)
-                                }
-                                className={`w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                    errors.start_time
-                                        ? "border-red-400 bg-red-50"
-                                        : "border-gray-300"
-                                }`}
-                            />
-                            {errors.start_time && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.start_time}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Durasi — hanya muncul untuk paket personal */}
-                        {isPersonal && (
-                            <div className="sm:col-span-2">
-                                <label
-                                    htmlFor="duration_minutes"
-                                    className="mb-1 block text-sm font-medium text-gray-700"
-                                >
-                                    Durasi (menit){" "}
-                                    <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    id="duration_minutes"
-                                    value={data.duration_minutes}
-                                    min={30}
-                                    step={15}
-                                    onChange={(e) =>
-                                        setData(
-                                            "duration_minutes",
-                                            e.target.value
-                                        )
-                                    }
-                                    className={`w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:max-w-xs ${
-                                        errors.duration_minutes
-                                            ? "border-red-400 bg-red-50"
-                                            : "border-gray-300"
-                                    }`}
-                                />
-                                {errors.duration_minutes && (
-                                    <p className="mt-1 text-xs text-red-500">
-                                        {errors.duration_minutes}
-                                    </p>
-                                )}
-                                <p className="mt-1 text-xs text-gray-400">
-                                    Minimal 30 menit. Total harga dihitung
-                                    setelah sesi selesai.
-                                </p>
-                            </div>
-                        )}
-                    </div>
+                <div className="flex flex-col">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#9aa7b3]">
+                        Pilih Meja
+                    </span>
+                    <select
+                        value={data.billiard_table_id}
+                        onChange={(e) => setData("billiard_table_id", e.target.value)}
+                        className="mt-2 w-full rounded-[10px] border border-[#222727] bg-[#151919] px-4 py-3 text-sm text-white focus:border-[#ffcc00] focus:outline-none transition-all duration-200"
+                    >
+                        {(tables || []).map((t) => (
+                            <option key={t.id} value={t.id}>
+                                Meja {t.table_number} - {t.name} ({t.status})
+                            </option>
+                        ))}
+                    </select>
+                    {errors.billiard_table_id && (
+                        <p className="mt-1.5 text-xs font-bold text-red-400">
+                            {errors.billiard_table_id}
+                        </p>
+                    )}
                 </div>
 
-                {/* Catatan */}
-                <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+                <div className="flex flex-col">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#9aa7b3]">
+                        Tanggal Reservasi
+                    </span>
+                    <input
+                        type="date"
+                        value={data.reservation_date}
+                        onChange={(e) => setData("reservation_date", e.target.value)}
+                        className="mt-2 w-full rounded-[10px] border border-[#222727] bg-[#151919] px-4 py-3 text-sm text-white focus:border-[#ffcc00] focus:outline-none transition-all duration-200"
+                    />
+                    {errors.reservation_date && (
+                        <p className="mt-1.5 text-xs font-bold text-red-400">
+                            {errors.reservation_date}
+                        </p>
+                    )}
+                </div>
+
+                <div className="flex flex-col">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#9aa7b3]">
+                        Jam Mulai Bermain
+                    </span>
+                    <input
+                        type="time"
+                        value={data.start_time}
+                        onChange={(e) => setData("start_time", e.target.value)}
+                        className="mt-2 w-full rounded-[10px] border border-[#222727] bg-[#151919] px-4 py-3 text-sm text-white focus:border-[#ffcc00] focus:outline-none transition-all duration-200"
+                    />
+                    {errors.start_time && (
+                        <p className="mt-1.5 text-xs font-bold text-red-400">
+                            {errors.start_time}
+                        </p>
+                    )}
+                </div>
+
+                {/* Package Info & Durations */}
+                {pkg?.type === "regular" && (
+                    <div className="md:col-span-2 rounded-[12px] border border-blue-500/20 bg-blue-500/5 p-4 transition-all duration-300">
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="text-[#9aa7b3] font-bold">Durasi Paket:</span>
+                            <span className="text-white font-extrabold">{pkg.duration_minutes} menit ({pkg.duration_minutes / 60} Jam)</span>
+                        </div>
+                        <div className="mt-2 flex items-center justify-between text-sm">
+                            <span className="text-[#9aa7b3] font-bold">Waktu Mulai:</span>
+                            <span className="text-white font-extrabold font-mono">{data.start_time}</span>
+                        </div>
+                        <div className="mt-2 flex items-center justify-between border-t border-blue-500/10 pt-2 text-base">
+                            <span className="text-[#ffcc00] font-black">Estimasi Selesai:</span>
+                            <span className="text-[#ffcc00] font-black font-mono">
+                                {calculateEndTime(data.start_time, pkg.duration_minutes)}
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {pkg?.type === "personal" && (
+                    <div className="md:col-span-2 rounded-[12px] border border-emerald-500/20 bg-emerald-500/5 p-4 transition-all duration-300">
+                        <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-emerald-400 font-extrabold text-sm uppercase tracking-wider">Paket Personal</span>
+                        </div>
+                        <p className="mt-2 text-xs text-[#9aa7b3] leading-relaxed">
+                            Paket personal dikenakan biaya berdasarkan durasi waktu bermain Anda. Timer akan diaktifkan oleh petugas ketika Anda mulai bermain, dan total tagihan dihitung secara akurat saat Anda selesai.
+                        </p>
+                        <div className="mt-3 flex items-center justify-between border-t border-emerald-500/10 pt-2 text-sm">
+                            <span className="text-white font-bold">Tarif Bermain:</span>
+                            <span className="text-[#ffcc00] font-extrabold font-mono">{money(pkg.price)} / jam</span>
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex flex-col md:col-span-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#9aa7b3]">
                         Catatan Tambahan
-                    </h2>
+                    </span>
                     <textarea
-                        id="notes"
                         value={data.notes}
                         onChange={(e) => setData("notes", e.target.value)}
+                        placeholder="Masukkan catatan jika ada..."
                         rows={3}
-                        placeholder="Permintaan khusus, jumlah pemain, dll. (opsional)"
-                        className={`w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            errors.notes
-                                ? "border-red-400 bg-red-50"
-                                : "border-gray-300"
-                        }`}
+                        className="mt-2 w-full rounded-[10px] border border-[#222727] bg-[#151919] px-4 py-3 text-sm text-white focus:border-[#ffcc00] focus:outline-none transition-all duration-200"
                     />
                     {errors.notes && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1.5 text-xs font-bold text-red-400">
                             {errors.notes}
                         </p>
                     )}
                 </div>
 
-                {/* Info ringkas sebelum submit */}
-                {selectedPackage && (
-                    <div
-                        className={`rounded-lg border px-4 py-3 text-sm ${
-                            isPersonal
-                                ? "border-purple-200 bg-purple-50 text-purple-800"
-                                : "border-blue-200 bg-blue-50 text-blue-800"
-                        }`}
-                    >
-                        {isPersonal ? (
-                            <>
-                                <strong>Paket Personal:</strong> Durasi dihitung
-                                dari input Anda. Total harga akan ditetapkan
-                                setelah sesi bermain selesai (
-                                <em>paid after play</em>).
-                            </>
-                        ) : (
-                            <>
-                                <strong>Paket Regular:</strong> Durasi{" "}
-                                {selectedPackage.duration_minutes} menit, total
-                                harga{" "}
-                                <strong>
-                                    Rp{" "}
-                                    {Number(
-                                        selectedPackage.price
-                                    ).toLocaleString("id-ID")}
-                                </strong>
-                                . Pembayaran dilakukan sebelum sesi dimulai.
-                            </>
-                        )}
+                <div className="md:col-span-2 border-t border-[#222727] pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="text-sm font-bold text-[#c7d0d8]">
+                        Estimasi Biaya:{" "}
+                        <span className="text-lg font-black text-[#ffcc00] ml-1">
+                            {pkg?.type === "personal"
+                                ? "Bayar setelah bermain"
+                                : money(pkg?.price || 0)}
+                        </span>
                     </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex items-center justify-end gap-3">
-                    <Link
-                        href={route("customer.reservations.index")}
-                        className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                    >
-                        Batal
-                    </Link>
                     <button
-                        type="submit"
                         disabled={processing}
-                        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-[10px] bg-[#ffcc00] px-6 py-3 font-extrabold text-[#151919] hover:bg-[#e6b800] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:scale-100"
                     >
-                        {processing && (
-                            <svg
-                                className="h-4 w-4 animate-spin"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                            >
-                                <circle
-                                    className="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                />
-                                <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8v8H4z"
-                                />
-                            </svg>
-                        )}
                         {processing ? "Memproses..." : "Buat Reservasi"}
                     </button>
                 </div>
             </form>
-        </div>
+        </CustomerLayout>
     );
 }

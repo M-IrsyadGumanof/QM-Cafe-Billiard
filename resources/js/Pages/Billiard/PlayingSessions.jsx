@@ -1,105 +1,73 @@
-import BilliardLayout from '@/Layouts/BilliardLayout';
-import { Link } from '@inertiajs/react';
+import BilliardLayout from "@/Layouts/BilliardLayout";
+import StatusBadge from "@/Components/Shared/StatusBadge";
 
 export default function PlayingSessions({ reservations }) {
+    const rows = reservations || [];
+
     return (
         <BilliardLayout>
-            <div className="space-y-6">
-                <h1 className="text-2xl font-bold text-gray-800">Playing Sessions</h1>
+            {/* Header Banner */}
+            <div className="border-b border-[#222727] pb-6">
+                <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[#ffcc00]">
+                    Sessions
+                </p>
+                <h1 className="mt-2 text-2xl font-black text-white md:text-3xl font-serif">
+                    Playing Sessions
+                </h1>
+                <p className="mt-1 text-xs text-[#9aa7b3]">
+                    Daftar sesi permainan yang sedang aktif berjalan di meja billiard saat ini.
+                </p>
+            </div>
 
-                {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
-                        <p className="text-sm text-blue-600 font-medium">Confirmed</p>
-                        <p className="text-3xl font-bold text-blue-700 mt-1">
-                            {reservations.filter((r) => r.booking_status === 'confirmed').length}
-                        </p>
-                        <p className="text-xs text-blue-500 mt-1">Menunggu mulai bermain</p>
-                    </div>
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-5">
-                        <p className="text-sm text-green-600 font-medium">Playing</p>
-                        <p className="text-3xl font-bold text-green-700 mt-1">
-                            {reservations.filter((r) => r.booking_status === 'playing').length}
-                        </p>
-                        <p className="text-xs text-green-500 mt-1">Sedang bermain</p>
-                    </div>
-                </div>
+            {/* Sessions Grid */}
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {rows.length > 0 ? (
+                    rows.map((r) => (
+                        <div
+                            key={r.id}
+                            className="rounded-[15px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-5 shadow-sm flex flex-col justify-between transition-all duration-300 hover:border-[#ffcc00]/10 hover:shadow-lg"
+                        >
+                            <div>
+                                <div className="flex justify-between items-start border-b border-[#222727] pb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-white text-sm leading-tight">
+                                                {r.table?.name || "N/A"}
+                                            </p>
+                                            <p className="text-[10px] text-[#ffcc00] font-mono mt-0.5">
+                                                {r.reservation_code}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <StatusBadge value={r.booking_status} />
+                                </div>
 
-                {/* Tabel Sesi */}
-                <div className="bg-white rounded-xl shadow">
-                    <div className="px-6 py-4 border-b">
-                        <h2 className="text-lg font-semibold text-gray-800">Sesi Aktif</h2>
+                                <div className="mt-4 space-y-2 text-xs">
+                                    <div className="flex justify-between">
+                                        <span className="text-[#9aa7b3] font-bold">Pemain / Pelanggan:</span>
+                                        <span className="text-white font-semibold">{r.user?.name || "Customer"}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-[#9aa7b3] font-bold">Durasi Bermain:</span>
+                                        <span className="text-white font-semibold font-mono">
+                                            {r.start_time?.substring(0, 5)} - {r.end_time?.substring(0, 5)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="col-span-full rounded-[15px] border border-dashed border-[#222727] p-12 text-center bg-[#151919]/20 text-sm text-[#9aa7b3]">
+                        Tidak ada sesi permainan billiard yang sedang aktif saat ini.
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-                                <tr>
-                                    <th className="px-6 py-3 text-left">Kode</th>
-                                    <th className="px-6 py-3 text-left">Customer</th>
-                                    <th className="px-6 py-3 text-left">Meja</th>
-                                    <th className="px-6 py-3 text-left">Paket</th>
-                                    <th className="px-6 py-3 text-left">Tanggal</th>
-                                    <th className="px-6 py-3 text-left">Jam</th>
-                                    <th className="px-6 py-3 text-left">Status</th>
-                                    <th className="px-6 py-3 text-left">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {reservations.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={8} className="px-6 py-8 text-center text-gray-400">
-                                            Tidak ada sesi aktif saat ini.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    reservations.map((r) => (
-                                        <tr key={r.id} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 font-mono">{r.reservation_code}</td>
-                                            <td className="px-6 py-4">{r.user?.name ?? '-'}</td>
-                                            <td className="px-6 py-4">{r.table?.name ?? '-'}</td>
-                                            <td className="px-6 py-4">{r.package?.name ?? '-'}</td>
-                                            <td className="px-6 py-4">{r.reservation_date}</td>
-                                            <td className="px-6 py-4">{r.start_time} - {r.end_time}</td>
-                                            <td className="px-6 py-4">
-                                                <StatusBadge status={r.booking_status} />
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <Link
-                                                    href={route('billiard.reservations.show', r.id)}
-                                                    className="text-blue-600 hover:underline text-sm"
-                                                >
-                                                    Detail
-                                                </Link>
-                                                {r.package_type === 'personal' && (
-                                                    <Link
-                                                        href={route('billiard.personal-billing.show', r.id)}
-                                                        className="ml-3 text-yellow-600 hover:underline text-sm"
-                                                    >
-                                                        Billing
-                                                    </Link>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                )}
             </div>
         </BilliardLayout>
-    );
-}
-
-function StatusBadge({ status }) {
-    const map = {
-        confirmed: 'bg-blue-100 text-blue-700',
-        playing: 'bg-green-100 text-green-700',
-    };
-
-    return (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${map[status] ?? 'bg-gray-100 text-gray-600'}`}>
-            {status}
-        </span>
     );
 }

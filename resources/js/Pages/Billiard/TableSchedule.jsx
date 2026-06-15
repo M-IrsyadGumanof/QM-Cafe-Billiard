@@ -1,79 +1,78 @@
-import BilliardLayout from '@/Layouts/BilliardLayout';
+import BilliardLayout from "@/Layouts/BilliardLayout";
+import StatusBadge from "@/Components/Shared/StatusBadge";
+import { date } from "@/Components/Shared/Format";
 
 export default function TableSchedule({ reservations }) {
-    // Group reservasi berdasarkan meja
-    const grouped = reservations.reduce((acc, r) => {
-        const tableName = r.table?.name ?? 'Unknown';
-        if (!acc[tableName]) acc[tableName] = [];
-        acc[tableName].push(r);
-        return acc;
-    }, {});
+    const rows = reservations || [];
 
     return (
         <BilliardLayout>
-            <div className="space-y-6">
-                <h1 className="text-2xl font-bold text-gray-800">Jadwal Meja</h1>
+            {/* Header Banner */}
+            <div className="border-b border-[#222727] pb-6">
+                <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[#ffcc00]">
+                    Schedule
+                </p>
+                <h1 className="mt-2 text-2xl font-black text-white md:text-3xl font-serif">
+                    Table Schedule
+                </h1>
+                <p className="mt-1 text-xs text-[#9aa7b3]">
+                    Jadwal pemakaian aktif meja billiard yang telah dipesan oleh pelanggan.
+                </p>
+            </div>
 
-                {Object.keys(grouped).length === 0 ? (
-                    <div className="bg-white rounded-xl shadow p-8 text-center text-gray-400">
-                        Belum ada jadwal reservasi.
-                    </div>
-                ) : (
-                    Object.entries(grouped).map(([tableName, items]) => (
-                        <div key={tableName} className="bg-white rounded-xl shadow">
-                            <div className="px-6 py-4 border-b bg-gray-50 rounded-t-xl">
-                                <h2 className="text-base font-semibold text-gray-700">{tableName}</h2>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead className="text-gray-600 uppercase text-xs bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left">Kode</th>
-                                            <th className="px-6 py-3 text-left">Customer</th>
-                                            <th className="px-6 py-3 text-left">Tanggal</th>
-                                            <th className="px-6 py-3 text-left">Jam Mulai</th>
-                                            <th className="px-6 py-3 text-left">Jam Selesai</th>
-                                            <th className="px-6 py-3 text-left">Paket</th>
-                                            <th className="px-6 py-3 text-left">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {items.map((r) => (
-                                            <tr key={r.id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 font-mono">{r.reservation_code}</td>
-                                                <td className="px-6 py-4">{r.user?.name ?? '-'}</td>
-                                                <td className="px-6 py-4">{r.reservation_date}</td>
-                                                <td className="px-6 py-4">{r.start_time}</td>
-                                                <td className="px-6 py-4">{r.end_time}</td>
-                                                <td className="px-6 py-4">{r.package?.name ?? '-'}</td>
-                                                <td className="px-6 py-4">
-                                                    <StatusBadge status={r.booking_status} />
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+            {/* Schedule Grid */}
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {rows.length > 0 ? (
+                    rows.map((r) => (
+                        <div
+                            key={r.id}
+                            className="rounded-[15px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-5 shadow-sm flex flex-col justify-between transition-all duration-300 hover:border-[#ffcc00]/10 hover:shadow-lg"
+                        >
+                            <div>
+                                <div className="flex justify-between items-start border-b border-[#222727] pb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400">
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-white text-sm leading-tight">
+                                                {r.table?.name || "N/A"}
+                                            </p>
+                                            <p className="text-[10px] text-[#ffcc00] font-mono mt-0.5">
+                                                {r.reservation_code}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <StatusBadge value={r.booking_status} />
+                                </div>
+
+                                <div className="mt-4 space-y-2 text-xs">
+                                    <div className="flex justify-between">
+                                        <span className="text-[#9aa7b3] font-bold">Tanggal:</span>
+                                        <span className="text-white font-semibold font-mono">{date(r.reservation_date)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-[#9aa7b3] font-bold">Jam:</span>
+                                        <span className="text-white font-semibold font-mono">
+                                            {r.start_time?.substring(0, 5)} - {r.end_time?.substring(0, 5)}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-[#9aa7b3] font-bold">Pelanggan:</span>
+                                        <span className="text-white font-semibold">{r.user?.name || "Customer"}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ))
+                ) : (
+                    <div className="col-span-full rounded-[15px] border border-dashed border-[#222727] p-12 text-center bg-[#151919]/20 text-sm text-[#9aa7b3]">
+                        Tidak ada jadwal reservasi aktif meja billiard saat ini.
+                    </div>
                 )}
             </div>
         </BilliardLayout>
-    );
-}
-
-function StatusBadge({ status }) {
-    const map = {
-        pending: 'bg-yellow-100 text-yellow-700',
-        confirmed: 'bg-blue-100 text-blue-700',
-        playing: 'bg-green-100 text-green-700',
-        completed: 'bg-gray-100 text-gray-700',
-        cancelled: 'bg-red-100 text-red-700',
-    };
-
-    return (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${map[status] ?? 'bg-gray-100 text-gray-600'}`}>
-            {status}
-        </span>
     );
 }
