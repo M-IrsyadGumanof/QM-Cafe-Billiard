@@ -34,4 +34,9 @@ class User extends Authenticatable
     protected $casts = [
         'password' => 'hashed',
     ];
+
+    public function reservations()
+    {
+        return $this->hasMany(\App\Models\Reservation::class);
+    }
 }
