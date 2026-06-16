@@ -16,12 +16,12 @@ const styles = {
   pending_payment: 'border-[#ffcc00]/30 bg-[#ffcc00]/10 text-[#ffcc00]',
   unpaid: 'border-[#ffcc00]/30 bg-[#ffcc00]/10 text-[#ffcc00]',
   reserved: 'border-[#ffcc00]/30 bg-[#ffcc00]/10 text-[#ffcc00]',
-  
+
   playing: 'border-purple-500/30 bg-purple-500/10 text-purple-300',
   occupied: 'border-purple-500/30 bg-purple-500/10 text-purple-300',
-  
+
   inactive: 'border-gray-500/30 bg-gray-500/10 text-gray-300',
-  
+
   suspended: 'border-red-500/30 bg-red-500/10 text-red-300',
   rejected: 'border-red-500/30 bg-red-500/10 text-red-300',
   cancelled: 'border-red-500/30 bg-red-500/10 text-red-300',
@@ -40,3 +40,5 @@ export default function StatusBadge({ value }) {
     </span>
   );
 }
+
+
