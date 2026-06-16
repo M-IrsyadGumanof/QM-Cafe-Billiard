@@ -77,7 +77,7 @@ class ProfileController extends Controller
         }
 
         $path = $request->file('avatar')->store('avatars', 'public');
-
+        
         $user->update([
             'avatar' => $path,
         ]);

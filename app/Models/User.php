@@ -6,7 +6,6 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -35,27 +34,27 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
-    public function orders(): HasMany
+    public function orders()
     {
         return $this->hasMany(Order::class);
     }
 
-    public function reservations(): HasMany
+    public function reservations()
     {
         return $this->hasMany(Reservation::class);
     }
 
-    public function payments(): HasMany
+    public function payments()
     {
         return $this->hasMany(Payment::class);
     }
 
-    public function qmNotifications(): HasMany
+    public function qmNotifications()
     {
         return $this->hasMany(QmNotification::class);
     }
 
-    public function testimonials(): HasMany
+    public function testimonials()
     {
         return $this->hasMany(Testimonial::class);
     }
