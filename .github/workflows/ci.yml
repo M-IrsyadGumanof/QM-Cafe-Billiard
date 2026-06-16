@@ -1,0 +1,76 @@
+name: CI - QM Cafe and Billiard
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - suhafdal
+      - irsyad
+      - iqhfal
+      - galang
+      - febri
+  pull_request:
+    branches:
+      - develop
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-check:
+    name: Quality Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: sqlite
+      DB_DATABASE: database/database.sqlite
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, dom, fileinfo, sqlite3, pdo_sqlite, openssl, tokenizer, xml, ctype, json, bcmath
+          coverage: none
+          tools: composer:v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Prepare Laravel environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --ansi
+          mkdir -p database
+          touch database/database.sqlite
+          php artisan config:clear --ansi
+
+      - name: Run database migrations
+        run: php artisan migrate --force --ansi
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Run Laravel tests
+        run: php artisan test --ansi
