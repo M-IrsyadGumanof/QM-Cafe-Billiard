@@ -91,12 +91,15 @@ class CustomerReservationTest extends TestCase
                 'notes' => 'Testing regular booking',
             ]);
 
+        $reservation = Reservation::first();
+        $this->assertNotNull($reservation);
+        $this->assertEquals($reservationDate, Carbon::parse($reservation->reservation_date)->format('Y-m-d'));
+
         $this->assertDatabaseHas('reservations', [
             'user_id' => $this->customer->id,
             'billiard_table_id' => $this->availableTable->id,
             'billiard_package_id' => $this->regularPackage->id,
             'package_type' => 'regular',
-            'reservation_date' => $reservationDate,
             'start_time' => $startTime,
             'duration_minutes' => 120,
             'total_price' => 50000,
@@ -104,7 +107,6 @@ class CustomerReservationTest extends TestCase
             'payment_status' => 'unpaid',
         ]);
 
-        $reservation = Reservation::first();
         $response->assertRedirect(route('customer.reservations.show', $reservation));
 
         $this->assertDatabaseHas('qm_notifications', [
@@ -128,12 +130,15 @@ class CustomerReservationTest extends TestCase
                 'notes' => 'Testing personal booking',
             ]);
 
+        $reservation = Reservation::latest('id')->first();
+        $this->assertNotNull($reservation);
+        $this->assertEquals($reservationDate, Carbon::parse($reservation->reservation_date)->format('Y-m-d'));
+
         $this->assertDatabaseHas('reservations', [
             'user_id' => $this->customer->id,
             'billiard_table_id' => $this->availableTable->id,
             'billiard_package_id' => $this->personalPackage->id,
             'package_type' => 'personal',
-            'reservation_date' => $reservationDate,
             'start_time' => $startTime,
             'duration_minutes' => 90,
             'total_price' => 0,
