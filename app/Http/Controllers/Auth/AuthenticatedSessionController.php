@@ -38,14 +38,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $role = Auth::user()->role;
-
-        return match($role) {
-            'admin' => redirect()->intended(route('admin.billiard-tables.index')),
-            'billiard_staff' => redirect()->intended(route('billiard.dashboard')),
-            'customer' => redirect()->intended(route('customer.reservations.index')),
-            default => redirect('/'),
-        };
+        return redirect()->intended(route('home', absolute: false));
     }
 
     public function destroy(Request $request): RedirectResponse
