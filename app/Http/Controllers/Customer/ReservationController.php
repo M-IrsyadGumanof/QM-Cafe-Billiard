@@ -50,7 +50,7 @@ class ReservationController extends Controller
         $end = $start->copy()->addMinutes($duration);
 
         $conflict = Reservation::where('billiard_table_id', $table->id)
-            ->where('reservation_date', $validated['reservation_date'])
+            ->whereDate('reservation_date', $validated['reservation_date'])
             ->whereNotIn('booking_status', ['cancelled','completed'])
             ->where(function ($query) use ($validated, $end) {
                 $query->whereBetween('start_time', [$validated['start_time'], $end->format('H:i')])
