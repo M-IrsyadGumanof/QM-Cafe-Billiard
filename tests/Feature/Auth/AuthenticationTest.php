@@ -19,7 +19,8 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
-        $this->markTestSkipped();
+        $this->markTestSkipped('Menunggu penyelesaian modul dari tim lain (route customer.dashboard).');
+        
         $user = User::factory()->create();
 
         $response = $this->post('/login', [
