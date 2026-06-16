@@ -1,85 +1,50 @@
 # QM Cafe & Billiard
 
-QM Cafe & Billiard is a web application built using Laravel, React, and Inertia.js to manage operations for a Cafe and Billiard business.
+QM Cafe & Billiard adalah project PBL berbasis Laravel 13, Inertia, React, dan Tailwind CSS untuk mengelola informasi cafe, pemesanan makanan/minuman, cart, checkout, reservasi billiard, upload bukti pembayaran, verifikasi pembayaran manual, dashboard staff, dan laporan owner.
 
-## 🚀 Features
+## Role Demo
 
-- **User Authentication**: Secure login and registration powered by Laravel Breeze.
-- **Dashboard**: Centralized hub to monitor operations.
-- **Profile Management**: Users can update their profile information and security settings.
-- **Modern UI**: Designed using Tailwind CSS and Headless UI for an interactive and responsive user experience.
+| Role | Email | Password |
+|---|---|---|
+| Admin/Cashier | admin@qmcafe.com | Admin@12345 |
+| Customer | customer@qmcafe.com | Customer@12345 |
+| Kitchen Staff | kitchen@qmcafe.com | Kitchen@12345 |
+| Billiard Staff | billiard@qmcafe.com | Billiard@12345 |
+| Owner | owner@qmcafe.com | Owner@12345 |
 
-## 🛠️ Technology Stack
+## Fitur MVP
 
-- **Backend**: Laravel 11.x
-- **Frontend**: React 18 & Inertia.js
-- **Styling**: Tailwind CSS
-- **Build Tool**: Vite
+- Public website: home, about, contact, menu, menu detail, billiard packages, table availability, gallery, FAQ, testimonials.
+- Auth: login, register customer, reset password, profile Breeze.
+- Customer: dashboard, menu, cart, checkout, order history, reservation, payment upload, notifications.
+- Admin/Cashier: dashboard, users, menu, categories, billiard tables, bookings, orders, payments, FAQ, reports, notifications.
+- Kitchen Staff: dashboard order dan update status order.
+- Billiard Staff: dashboard reservasi, table schedule, playing sessions, personal billing.
+- Owner: dashboard dan reports sederhana.
 
-## ⚙️ Requirements
+## Cara Menjalankan
 
-- PHP 8.3 or higher
-- Composer
-- Node.js & NPM
-- Database (SQLite, MySQL, PostgreSQL, etc.)
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan storage:link
+php artisan migrate:fresh --seed
+npm run dev
+php artisan serve
+```
 
-## 🚀 Getting Started
+Buka aplikasi:
 
-1. **Clone the Repository**
-   ```bash
-   git clone <repository-url>
-   cd QM-Cafe-Billiard
-   ```
+```text
+http://127.0.0.1:8000
+```
 
-2. **Install PHP Dependencies**
-   ```bash
-   composer install
-   ```
+## Catatan Database
 
-3. **Install NPM Dependencies**
-   ```bash
-   npm install
-   ```
+Default `.env.example` memakai SQLite. Jika memakai MySQL, ubah konfigurasi database di `.env` sesuai database lokal.
 
-4. **Environment Setup**
-   Copy the example `.env` file and generate the application key:
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
+## Catatan Demo
 
-5. **Database Migration**
-   Run the database migrations to set up your tables:
-   ```bash
-   php artisan migrate
-   ```
-
-6. **Run the Application**
-   Start both the Laravel development server and Vite:
-   ```bash
-   npm run dev
-   php artisan serve
-   ```
-   Visit `http://localhost:8000` in your browser.
-
-## 📝 Commit Guidelines
-
-To maintain a clean and organized commit history (addressing the review feedback "Commit GitHub cukup teratur"), please adhere to the following **Conventional Commits** format for all future changes:
-
-- `feat:` for adding new features.
-- `fix:` for fixing bugs.
-- `docs:` for documentation updates (like this README).
-- `style:` for formatting changes (whitespace, missing semicolons, etc.).
-- `refactor:` for code changes that neither fix a bug nor add a feature.
-- `test:` for adding or fixing tests.
-- `chore:` for updating build tasks, dependencies, etc.
-
-*Example:* `git commit -m "docs: add comprehensive README.md"`
-
-## 👥 Authors
-
-- Kelompok 3 (PBL)
-
-## 📄 License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Project ini disiapkan sebagai MVP siap demo PBL. Fitur production seperti audit log, backup, monitoring error, real-time notification, WhatsApp/email notification, export PDF/Excel, dan hardening server belum menjadi scope utama.
