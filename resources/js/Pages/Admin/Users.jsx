@@ -136,7 +136,7 @@ export default function Users({ users, filters }) {
                     Users Management
                 </h1>
                 <p className="mt-1 text-xs text-[#9aa7b3]">
-                    Kelola data staf (Admin, Kasir, Dapur) dan pelanggan QM Cafe & Billiard.
+                    Kelola data staf (Admin, Kasir, Dapur) dan pelanggan QM Cafe &amp; Billiard.
                 </p>
             </div>
 
