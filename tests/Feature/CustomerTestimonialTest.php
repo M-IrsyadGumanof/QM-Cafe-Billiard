@@ -13,8 +13,6 @@ class CustomerTestimonialTest extends TestCase
 
     public function test_customer_can_create_update_and_delete_their_testimonial(): void
     {
-        $this->markTestSkipped('Menunggu penyelesaian modul dari tim lain (route customer/testimonials).');
-        
         $user = User::factory()->create(['role' => 'customer']);
 
         $this->actingAs($user)
