@@ -132,6 +132,8 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::put('/testimonials/{testimonial}', [CustomerTestimonialController::class, 'update'])->name('testimonials.update');
     Route::delete('/testimonials/{testimonial}', [CustomerTestimonialController::class, 'destroy'])->name('testimonials.destroy');
     Route::get('/notifications', [CustomerNotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{notification}/read', [CustomerNotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::get('/active-session', [CustomerReservationController::class, 'activeSession'])->name('active-session');
 });
 
 Route::middleware(['auth', 'verified', 'role:kitchen_staff'])->prefix('kitchen')->name('kitchen.')->group(function () {

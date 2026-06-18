@@ -29,12 +29,14 @@ class Reservation extends Model
         'booking_status',
         'payment_status',
         'notes',
+        'expiry_notified',
     ];
 
     protected $casts = [
         'reservation_date' => 'date',
         'actual_start_time' => 'datetime',
         'actual_end_time' => 'datetime',
+        'expiry_notified' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -93,3 +95,4 @@ class Reservation extends Model
         return (int) max(0, now()->diffInMinutes($endTime, false));
     }
 }
+
