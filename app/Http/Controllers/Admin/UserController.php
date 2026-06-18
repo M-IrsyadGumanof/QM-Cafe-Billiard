@@ -16,25 +16,18 @@ class UserController extends Controller
     public function index(Request $request): Response
     {
         $users = User::query()
-            ->when($request->search, function ($q, $v) {
-                $q->where(function ($qq) use ($v) {
-                    $qq->where('name', 'like', "%$v%")
-                       ->orWhere('email', 'like', "%$v%");
-                });
-            })
-            ->when($request->role, function ($q, $v) {
-                $q->where('role', $v);
-            })
-            ->when($request->status, function ($q, $v) {
-                $q->where('status', $v);
-            })
+            ->when($request->search, fn ($q, $v) => $q->where(
+                fn ($qq) => $qq->where('name', 'like', "%$v%")->orWhere('email', 'like', "%$v%")
+            ))
+            ->when($request->role, fn ($q, $v) => $q->where('role', $v))
+            ->when($request->status, fn ($q, $v) => $q->where('status', $v))
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('Admin/Users', [
             'users' => $users,
-            'filters' => $request->only('search', 'role', 'status')
+            'filters' => $request->only('search', 'role', 'status'),
         ]);
     }
 
@@ -44,7 +37,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'role' => 'required|in:admin,kitchen_staff,billiard_staff,owner',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()]
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         User::create([
@@ -52,7 +45,7 @@ class UserController extends Controller
             'email' => $data['email'],
             'role' => $data['role'],
             'status' => 'active',
-            'password' => Hash::make($data['password'])
+            'password' => Hash::make($data['password']),
         ]);
 
         return back()->with('success', 'Staff berhasil ditambahkan.');
@@ -62,9 +55,9 @@ class UserController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'role' => 'required|in:customer,admin,kitchen_staff,billiard_staff,owner',
-            'status' => 'required|in:active,inactive,suspended'
+            'status' => 'required|in:active,inactive,suspended',
         ]);
 
         if ($user->id === auth()->id() && ($data['role'] !== 'admin' || $data['status'] !== 'active')) {
@@ -79,12 +72,10 @@ class UserController extends Controller
     public function resetPassword(Request $request, User $user): RedirectResponse
     {
         $data = $request->validate([
-            'password' => ['required', 'confirmed', Rules\Password::defaults()]
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user->update([
-            'password' => Hash::make($data['password'])
-        ]);
+        $user->update(['password' => Hash::make($data['password'])]);
 
         return back()->with('success', 'Password berhasil direset.');
     }

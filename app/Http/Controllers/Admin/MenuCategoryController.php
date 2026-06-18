@@ -15,7 +15,7 @@ class MenuCategoryController extends Controller
     public function index(): Response
     {
         return Inertia::render('Admin/MenuCategories', [
-            'categories' => MenuCategory::latest()->paginate(10)
+            'categories' => MenuCategory::latest()->paginate(10),
         ]);
     }
 
@@ -24,10 +24,10 @@ class MenuCategoryController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:active,inactive'
+            'status' => 'required|in:active,inactive',
         ]);
 
-        $data['slug'] = Str::slug($data['name']) . '-' . Str::random(4);
+        $data['slug'] = Str::slug($data['name']).'-'.Str::random(4);
 
         MenuCategory::create($data);
 
@@ -39,7 +39,7 @@ class MenuCategoryController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:active,inactive'
+            'status' => 'required|in:active,inactive',
         ]);
 
         $menuCategory->update($data);

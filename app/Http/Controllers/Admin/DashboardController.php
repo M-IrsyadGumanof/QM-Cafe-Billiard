@@ -20,11 +20,11 @@ class DashboardController extends Controller
                 'pending_payments' => Payment::where('status', 'pending')->count(),
                 'available_tables' => BilliardTable::where('status', 'available')->count(),
                 'revenue' => Payment::where('status', 'verified')->sum('amount'),
-                'testimonials' => Testimonial::count()
+                'testimonials' => Testimonial::count(),
             ],
             'recentOrders' => Order::with('user')->latest()->take(5)->get(),
             'recentReservations' => Reservation::with(['user', 'table', 'package'])->latest()->take(5)->get(),
-            'recentPayments' => Payment::with('user')->latest()->take(5)->get()
+            'recentPayments' => Payment::with('user')->latest()->take(5)->get(),
         ]);
     }
 }

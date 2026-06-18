@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Menu;
-use App\Models\MenuCategory;
+use App\Models\{Menu, MenuCategory};
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -17,17 +16,13 @@ class MenuController extends Controller
     {
         return Inertia::render('Admin/Menu', [
             'menus' => Menu::with('category')
-                ->when($request->search, function ($q, $v) {
-                    $q->where('name', 'like', "%$v%");
-                })
-                ->when($request->status, function ($q, $v) {
-                    $q->where('status', $v);
-                })
+                ->when($request->search, fn ($q, $v) => $q->where('name', 'like', "%$v%"))
+                ->when($request->status, fn ($q, $v) => $q->where('status', $v))
                 ->latest()
                 ->paginate(10)
                 ->withQueryString(),
             'categories' => MenuCategory::orderBy('name')->get(),
-            'filters' => $request->only('search', 'status')
+            'filters' => $request->only('search', 'status'),
         ]);
     }
 
@@ -40,10 +35,10 @@ class MenuController extends Controller
             'price' => 'required|integer|min:0',
             'stock' => 'required|integer|min:0',
             'status' => 'required|in:available,unavailable',
-            'image' => 'nullable|image|max:2048'
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        $data['slug'] = Str::slug($data['name']) . '-' . Str::random(4);
+        $data['slug'] = Str::slug($data['name']).'-'.Str::random(4);
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('menu', 'public');
@@ -63,7 +58,7 @@ class MenuController extends Controller
             'price' => 'required|integer|min:0',
             'stock' => 'required|integer|min:0',
             'status' => 'required|in:available,unavailable',
-            'image' => 'nullable|image|max:2048'
+            'image' => 'nullable|image|max:2048',
         ]);
 
         if ($request->hasFile('image')) {

@@ -19,8 +19,6 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
-        $this->markTestSkipped('Menunggu penyelesaian modul dari tim lain (route customer.dashboard).');
-        
         $user = User::factory()->create();
 
         $response = $this->post('/login', [
@@ -29,7 +27,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('customer.dashboard', absolute: false));
+        $response->assertRedirect(route('home', absolute: false));
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void

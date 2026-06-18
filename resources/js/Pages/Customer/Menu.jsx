@@ -19,7 +19,7 @@ export default function Menu({ menus, categories }) {
                 quantity: 1,
             });
         localStorage.setItem("qm_cart", JSON.stringify(cart));
-
+        
         // Show premium toast alert
         setToast(`${menu.name} berhasil ditambahkan ke keranjang!`);
         setTimeout(() => setToast(null), 2500);
@@ -70,7 +70,7 @@ export default function Menu({ menus, categories }) {
                             <p className="mt-1 text-xs font-bold text-[#5b6e6e] uppercase tracking-wider">
                                 {menu.category?.name || "Lainnya"}
                             </p>
-
+                            
                             <p className="mt-3 text-lg font-black text-[#ffcc00]">
                                 {money(menu.price)}
                             </p>
