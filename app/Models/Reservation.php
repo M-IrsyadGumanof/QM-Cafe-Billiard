@@ -87,7 +87,8 @@ class Reservation extends Model
             return null;
         }
 
-        $endTime = $this->actual_start_time->addMinutes($this->duration_minutes);
+        // Gunakan ->copy() agar tidak merubah data aslinya (karena Carbon mutable)
+        $endTime = $this->actual_start_time->copy()->addMinutes($this->duration_minutes);
 
         return (int) max(0, now()->diffInMinutes($endTime, false));
     }

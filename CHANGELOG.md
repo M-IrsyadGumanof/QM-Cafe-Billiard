@@ -11,15 +11,23 @@ Format kategori yang digunakan: `Added`, `Changed`, `Fixed`, `Removed`, `Depende
 ## [Unreleased]
 
 ### Planned
+- Menambahkan fitur notifikasi durasi waktu main billiard hampir habis.
+- Menambahkan logika perhitungan sisa waktu sesi billiard.
+- Menampilkan notifikasi pada dashboard staf billiard ketika waktu bermain mendekati selesai.
+- Implementasi fitur Login & Registrasi
+- Setup struktur database (migrasi tabel awal)
+- Implementasi Homepage QM Biliard & Cafe
+- Implementasi pemesanan makanan via QR Code
+- Implementasi booking meja billiard
+- Implementasi panel admin
+- Implementasi sistem laporan otomatis
 
-- Implementasi homepage dan informasi publik QM Cafe & Billiard.
-- Implementasi role: Customer, Admin/Cashier, Kitchen Staff, Billiard Staff, dan Owner.
-- Implementasi menu serta pemesanan makanan/minuman untuk customer login.
-- Implementasi reservasi billiard Paket Regular dan Paket Personal.
-- Implementasi dashboard verifikasi pembayaran transfer/QRIS secara manual.
-- Implementasi Update Table Availability/Schedule.
-- Implementasi laporan dan statistik untuk Owner.
-- Implementasi workflow GitHub Actions/CI.
+### Impacted Modules
+- Billiard Session Module
+- Reservation Module
+- Notification Module
+- Staff Billiard Dashboard
+- Customer Notification Page
 
 ---
 
