@@ -113,8 +113,9 @@ class SessionExpiringNotificationTest extends TestCase
 
         // Assert event was only dispatched once total
         Event::assertDispatched(SessionExpiringEvent::class, 1);
-        
         // Assert there is only one qm_notifications entry
         $this->assertEquals(1, \App\Models\QmNotification::where('user_id', $customer->id)->where('type', 'session_expiring')->count());
     }
+
+
 }

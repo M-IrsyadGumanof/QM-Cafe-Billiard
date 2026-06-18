@@ -41,6 +41,25 @@ Buka aplikasi:
 http://127.0.0.1:8000
 ```
 
+## Konfigurasi Real-Time & Background Jobs (Local Development)
+
+Mulai versi terbaru, project ini menggunakan Laravel Reverb dan sistem Queue (Database) untuk notifikasi *Real-Time* waktu bermain billiard yang hampir habis.
+Untuk menjalankan seluruh *service* secara bersamaan (Server Web, Vite, Queue Worker, Reverb WebSocket, dan Scheduler), cukup gunakan satu command `dev`:
+
+```bash
+npm run dev
+```
+
+Command di atas otomatis menjalankan kelima proses tersebut di belakang layar menggunakan `concurrently`.
+
+## Deployment ke Production
+
+Saat deploy ke Production (VPS / Shared Hosting dengan akses SSH), pastikan Anda mensetup **Supervisor** atau daemon manager lainnya agar ketiga service berikut selalu berjalan:
+
+1. **Queue Worker:** `php artisan queue:listen`
+2. **Reverb Server:** `php artisan reverb:start`
+3. **Scheduler:** Tambahkan entri Cron Job `* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1`
+
 ## Catatan Database
 
 Default `.env.example` memakai SQLite. Jika memakai MySQL, ubah konfigurasi database di `.env` sesuai database lokal.
