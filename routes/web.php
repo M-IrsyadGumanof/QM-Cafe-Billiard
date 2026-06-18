@@ -33,7 +33,6 @@ use App\Http\Controllers\Public\PageController;
 use App\Http\Controllers\Public\TableAvailabilityController;
 use Illuminate\Support\Facades\Route;
 
-// --- PUBLIC ROUTES (Galang) ---
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/about', [PageController::class, 'about'])->name('public.about');
 Route::get('/contact', [PageController::class, 'contact'])->name('public.contact');
@@ -45,7 +44,6 @@ Route::get('/gallery', [PageController::class, 'gallery'])->name('public.gallery
 Route::get('/faq', [PageController::class, 'faq'])->name('public.faq');
 Route::get('/testimonials', [PageController::class, 'testimonials'])->name('public.testimonials');
 
-// --- AUTH & PROFILE ROUTES ---
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -54,7 +52,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile/avatar', [ProfileController::class, 'destroyAvatar'])->name('profile.avatar.destroy');
 });
 
-// --- ADMIN ROUTES ---
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
 
@@ -68,7 +65,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::post('/menu', [AdminMenuController::class, 'store'])->name('menu.store');
         Route::patch('/menu/{menu}', [AdminMenuController::class, 'update'])->name('menu.update');
         Route::delete('/menu/{menu}', [AdminMenuController::class, 'destroy'])->name('menu.destroy');
-
+        
         Route::get('/menu-categories', [AdminMenuCategoryController::class, 'index'])->name('menu-categories.index');
         Route::post('/menu-categories', [AdminMenuCategoryController::class, 'store'])->name('menu-categories.store');
         Route::patch('/menu-categories/{menuCategory}', [AdminMenuCategoryController::class, 'update'])->name('menu-categories.update');
@@ -92,7 +89,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
         Route::patch('/payments/{payment}/verify', [AdminPaymentController::class, 'verify'])->name('payments.verify');
 
-        // Galang - Content Management
         Route::get('/faq', [AdminFaqController::class, 'index'])->name('faq.index');
         Route::post('/faq', [AdminFaqController::class, 'store'])->name('faq.store');
         Route::patch('/faq/{faq}', [AdminFaqController::class, 'update'])->name('faq.update');
@@ -114,7 +110,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     });
 });
 
-// --- CUSTOMER ROUTES ---
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', CustomerDashboardController::class)->name('dashboard');
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('profile');
@@ -132,17 +127,13 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::get('/payments', [CustomerPaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/upload', [CustomerPaymentController::class, 'create'])->name('payments.upload');
     Route::post('/payments', [CustomerPaymentController::class, 'store'])->name('payments.store');
-
-    // Galang - Customer Testimonial
     Route::get('/testimonials', [CustomerTestimonialController::class, 'index'])->name('testimonials.index');
     Route::post('/testimonials', [CustomerTestimonialController::class, 'store'])->name('testimonials.store');
     Route::put('/testimonials/{testimonial}', [CustomerTestimonialController::class, 'update'])->name('testimonials.update');
     Route::delete('/testimonials/{testimonial}', [CustomerTestimonialController::class, 'destroy'])->name('testimonials.destroy');
-
     Route::get('/notifications', [CustomerNotificationController::class, 'index'])->name('notifications.index');
 });
 
-// --- KITCHEN ROUTES ---
 Route::middleware(['auth', 'verified', 'role:kitchen_staff'])->prefix('kitchen')->name('kitchen.')->group(function () {
     Route::get('/dashboard', KitchenDashboardController::class)->name('dashboard');
     Route::get('/orders', [KitchenOrderController::class, 'index'])->name('orders.index');
@@ -150,7 +141,6 @@ Route::middleware(['auth', 'verified', 'role:kitchen_staff'])->prefix('kitchen')
     Route::patch('/orders/{order}/status', [KitchenOrderController::class, 'updateStatus'])->name('orders.status');
 });
 
-// --- BILLIARD STAFF ROUTES ---
 Route::middleware(['auth', 'verified', 'role:billiard_staff'])->prefix('billiard')->name('billiard.')->group(function () {
     Route::get('/dashboard', BilliardDashboardController::class)->name('dashboard');
     Route::get('/reservations', [BilliardReservationController::class, 'index'])->name('reservations.index');
@@ -161,7 +151,6 @@ Route::middleware(['auth', 'verified', 'role:billiard_staff'])->prefix('billiard
     Route::get('/personal-billing/{reservation}', [BilliardReservationController::class, 'billing'])->name('personal-billing.show');
 });
 
-// --- OWNER ROUTES ---
 Route::middleware(['auth', 'verified', 'role:owner'])->prefix('owner')->name('owner.')->group(function () {
     Route::get('/dashboard', OwnerDashboardController::class)->name('dashboard');
     Route::get('/reports', [OwnerReportController::class, 'index'])->name('reports.index');

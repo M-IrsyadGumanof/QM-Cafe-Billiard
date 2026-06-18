@@ -1,41 +1,48 @@
 <?php
+
 namespace App\Http\Controllers\Owner;
+
 use App\Http\Controllers\Controller;
-use App\Models\{Order,Payment,Reservation};
+use App\Models\{Order, Payment, Reservation};
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-class ReportController extends Controller { 
-    public function index(): Response { 
-        return Inertia::render('Owner/Reports',[
-            'summary'=>[
-                'orders'=>Order::count(),
-                'reservations'=>Reservation::count(),
-                'payments'=>Payment::count(),
-                'revenue'=>Payment::where('status','verified')->sum('amount'),
-                'pending_payments'=>Payment::where('status','pending')->count()
-            ],
-            'orders'=>Order::with('user')->latest()->take(10)->get(),
-            'reservations'=>Reservation::with(['user','table'])->latest()->take(10)->get()
-        ]); 
-    } 
 
-    public function export(\Illuminate\Http\Request $request)
+class ReportController extends Controller
+{
+    public function index(): Response
+    {
+        return Inertia::render('Owner/Reports', [
+            'summary' => [
+                'orders' => Order::count(),
+                'reservations' => Reservation::count(),
+                'payments' => Payment::count(),
+                'revenue' => Payment::where('status', 'verified')->sum('amount'),
+                'pending_payments' => Payment::where('status', 'pending')->count(),
+            ],
+            'orders' => Order::with('user')->latest()->take(10)->get(),
+            'reservations' => Reservation::with(['user', 'table'])->latest()->take(10)->get(),
+        ]);
+    }
+
+    public function export(Request $request)
     {
         $type = $request->query('type', 'payments');
-        $filename = "report-{$type}-" . date('Ymd-His') . ".csv";
+        $filename = "report-{$type}-".date('Ymd-His').'.csv';
         $headers = [
-            "Content-type" => "text/csv; charset=UTF-8",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv; charset=UTF-8',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
-        $callback = function() use ($type) {
+
+        $callback = function () use ($type) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
             if ($type === 'orders') {
                 fputcsv($file, ['ID', 'Order Code', 'User Name', 'User Email', 'Total Amount', 'Order Status', 'Payment Status', 'Created At']);
-                $orders = Order::with('user')->latest()->get();
-                foreach ($orders as $order) {
+                foreach (Order::with('user')->latest()->get() as $order) {
                     fputcsv($file, [
                         $order->id,
                         $order->order_code,
@@ -44,13 +51,12 @@ class ReportController extends Controller {
                         $order->total_amount,
                         $order->order_status,
                         $order->payment_status,
-                        $order->created_at
+                        $order->created_at,
                     ]);
                 }
             } elseif ($type === 'reservations') {
                 fputcsv($file, ['ID', 'Reservation Code', 'User Name', 'Table Name', 'Package Name', 'Date', 'Start Time', 'End Time', 'Total Price', 'Booking Status', 'Payment Status', 'Created At']);
-                $reservations = Reservation::with(['user', 'table', 'package'])->latest()->get();
-                foreach ($reservations as $res) {
+                foreach (Reservation::with(['user', 'table', 'package'])->latest()->get() as $res) {
                     fputcsv($file, [
                         $res->id,
                         $res->reservation_code,
@@ -63,13 +69,12 @@ class ReportController extends Controller {
                         $res->total_price,
                         $res->booking_status,
                         $res->payment_status,
-                        $res->created_at
+                        $res->created_at,
                     ]);
                 }
             } else {
                 fputcsv($file, ['ID', 'Payment Code', 'User Name', 'Amount', 'Payment Method', 'Status', 'Notes', 'Created At']);
-                $payments = Payment::with('user')->latest()->get();
-                foreach ($payments as $payment) {
+                foreach (Payment::with('user')->latest()->get() as $payment) {
                     fputcsv($file, [
                         $payment->id,
                         $payment->payment_code,
@@ -78,12 +83,14 @@ class ReportController extends Controller {
                         $payment->payment_method,
                         $payment->status,
                         $payment->notes,
-                        $payment->created_at
+                        $payment->created_at,
                     ]);
                 }
             }
+
             fclose($file);
         };
+
         return response()->streamDownload($callback, $filename, $headers);
     }
 }

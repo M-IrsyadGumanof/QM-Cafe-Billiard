@@ -14,7 +14,7 @@ html {
 }
 
 body {
-    @apply min-h-screen bg-[#111515] text-slate-100 antialiased;
+    @apply min-h-screen bg-surface text-slate-100 antialiased;
     background-image:
         radial-gradient(
             circle at top,
@@ -44,7 +44,7 @@ h4 {
     border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #ffcc00/40;
+    background: rgba(255, 204, 0, 0.4);
 }
 
 /* Glassmorphism Styles */
@@ -54,14 +54,13 @@ h4 {
     border: 1px solid rgba(43, 50, 50, 0.6);
 }
 
-/* Modern inputs */
+/* Modern inputs — use design tokens */
 .modern-input {
-    @apply rounded-[10px] border border-[#2b3232] bg-[#111515]/90 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition-all duration-300 focus:border-[#ffcc00] focus:ring-2 focus:ring-[#ffcc00]/10;
+    @apply rounded-[10px] border border-border-strong bg-surface/90 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition-all duration-300 focus:border-brand focus:ring-2 focus:ring-brand/10;
 }
 .modern-select {
-    @apply rounded-[10px] border border-[#2b3232] bg-[#111515]/90 px-4 py-2.5 text-sm text-white outline-none transition-all duration-300 focus:border-[#ffcc00] focus:ring-2 focus:ring-[#ffcc00]/10;
+    @apply rounded-[10px] border border-border-strong bg-surface/90 px-4 py-2.5 text-sm text-white outline-none transition-all duration-300 focus:border-brand focus:ring-2 focus:ring-brand/10;
 }
 .modern-btn-primary {
-    @apply rounded-[10px] bg-[#ffcc00] px-5 py-2.5 text-sm font-extrabold text-[#151919] hover:bg-[#ffe066] active:scale-95 transition-all duration-200 shadow-lg shadow-[#ffcc00]/10;
+    @apply rounded-[10px] bg-brand px-5 py-2.5 text-sm font-extrabold text-surface-elevated hover:bg-brand-hover active:scale-95 transition-all duration-200 shadow-lg shadow-brand/10;
 }
-

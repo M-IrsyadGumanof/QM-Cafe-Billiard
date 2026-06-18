@@ -5,7 +5,7 @@ import { useForm, Link } from "@inertiajs/react";
 
 export default function OrderDetail({ order }) {
     const f = useForm({ order_status: order.order_status });
-
+    
     const submit = (e) => {
         e.preventDefault();
         f.patch(`/admin/orders/${order.id}/status`);

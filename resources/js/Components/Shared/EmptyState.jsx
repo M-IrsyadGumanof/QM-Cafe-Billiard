@@ -1,11 +1,11 @@
 export default function EmptyState({
-  title = 'Data belum tersedia',
-  description = 'Belum ada data yang bisa ditampilkan.'
+    title = 'Data belum tersedia',
+    description = 'Belum ada data yang bisa ditampilkan.',
 }) {
-  return (
-    <div className="rounded-[7px] border border-dashed border-[#2b3232] bg-[#1d2222] p-8 text-center">
-      <p className="font-bold text-white">{title}</p>
-      <p className="mt-1 text-sm text-[#9aa7b3]">{description}</p>
-    </div>
-  );
+    return (
+        <div className="rounded-[7px] border border-dashed border-border-strong bg-surface-card p-8 text-center">
+            <p className="font-bold text-white">{title}</p>
+            <p className="mt-1 text-sm text-muted">{description}</p>
+        </div>
+    );
 }
