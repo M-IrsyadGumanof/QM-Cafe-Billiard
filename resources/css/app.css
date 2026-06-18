@@ -1,6 +1,66 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    color-scheme: dark;
+    font-family: "Inter", sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    @apply min-h-screen bg-surface text-slate-100 antialiased;
+    background-image:
+        radial-gradient(
+            circle at top,
+            rgba(255, 204, 0, 0.08),
+            transparent 18%
+        ),
+        linear-gradient(135deg, #111515 0%, #151a1a 45%, #111515 100%);
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: "Playfair Display", serif;
+    letter-spacing: -0.02em;
+}
+
+/* Custom Scrollbar for dark theme sidebar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #2b3232;
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 204, 0, 0.4);
+}
+
+/* Glassmorphism Styles */
+.glass-card {
+    background: linear-gradient(135deg, rgba(29, 34, 34, 0.7) 0%, rgba(17, 21, 21, 0.9) 100%);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(43, 50, 50, 0.6);
+}
+
+/* Modern inputs — use design tokens */
+.modern-input {
+    @apply rounded-[10px] border border-border-strong bg-surface/90 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition-all duration-300 focus:border-brand focus:ring-2 focus:ring-brand/10;
+}
+.modern-select {
+    @apply rounded-[10px] border border-border-strong bg-surface/90 px-4 py-2.5 text-sm text-white outline-none transition-all duration-300 focus:border-brand focus:ring-2 focus:ring-brand/10;
+}
+.modern-btn-primary {
+    @apply rounded-[10px] bg-brand px-5 py-2.5 text-sm font-extrabold text-surface-elevated hover:bg-brand-hover active:scale-95 transition-all duration-200 shadow-lg shadow-brand/10;
+}
