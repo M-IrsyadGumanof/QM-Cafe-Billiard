@@ -2,11 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\BilliardPackage;
 use App\Models\BilliardTable;
 use App\Models\Reservation;
 use App\Models\User;
+use App\Events\SessionExpiringEvent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -15,114 +16,116 @@ class SessionExpiringNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $customer;
-    private BilliardTable $table;
-
-    protected function setUp(): void
+    public function test_command_does_not_dispatch_event_if_remaining_time_is_above_5_minutes(): void
     {
-        parent::setUp();
+        Event::fake();
+        $this->travelTo(now()->startOfSecond());
 
-        $this->customer = User::factory()->create(['role' => 'customer']);
-        $this->table = BilliardTable::create([
-            'table_number' => 'T01',
-            'name' => 'Meja VIP 1',
-            'status' => 'playing',
+        $customer = User::factory()->create(['role' => 'customer']);
+        $table = BilliardTable::factory()->create();
+        $package = BilliardPackage::factory()->create();
+
+        // 30 minutes remaining
+        Reservation::factory()->create([
+            'user_id' => $customer->id,
+            'billiard_table_id' => $table->id,
+            'billiard_package_id' => $package->id,
+            'booking_status' => 'playing',
+            'actual_start_time' => now()->subMinutes(30),
+            'duration_minutes' => 60,
+        ]);
+
+        $this->artisan('billiard:check-expiring-sessions')
+            ->expectsOutput('Checked 0 expiring sessions.')
+            ->assertExitCode(0);
+
+        Event::assertNotDispatched(SessionExpiringEvent::class);
+        $this->assertDatabaseMissing('qm_notifications', [
+            'type' => 'session_expiring',
         ]);
     }
 
-    public function test_command_dispatches_event_for_session_expiring_in_5_minutes(): void
+    public function test_command_dispatches_event_and_stores_notification_when_remaining_time_is_between_4_and_5_minutes(): void
     {
         Event::fake();
+        $this->travelTo(now()->startOfSecond());
 
-        // Reservasi aktif yang akan habis 5 menit lagi
-        $reservation = Reservation::create([
-            'user_id' => $this->customer->id,
-            'billiard_table_id' => $this->table->id,
-            'billiard_package_id' => 1, // Asumsi default package
-            'reservation_code' => 'RSV-EXP-001',
-            'package_type' => 'regular',
-            'reservation_date' => Carbon::today()->format('Y-m-d'),
-            'start_time' => Carbon::now()->subMinutes(115)->format('H:i'), // Dimulai 115 menit lalu
-            'duration_minutes' => 120, // Durasi 120 menit (Sisa 5 menit)
+        $customer = User::factory()->create(['role' => 'customer']);
+        $table = BilliardTable::factory()->create(['name' => 'Meja VIP 1']);
+        $package = BilliardPackage::factory()->create();
+
+        // 5 minutes remaining (duration 60, actual_start_time is 55 minutes ago)
+        $reservation = Reservation::factory()->create([
+            'user_id' => $customer->id,
+            'billiard_table_id' => $table->id,
+            'billiard_package_id' => $package->id,
             'booking_status' => 'playing',
-            'actual_start_time' => Carbon::now()->subMinutes(115),
-            'payment_status' => 'paid',
+            'actual_start_time' => now()->subMinutes(55),
+            'duration_minutes' => 60,
         ]);
 
-        $this->artisan('billiard:check-expiring-sessions')->assertSuccessful();
+        $this->artisan('billiard:check-expiring-sessions')
+            ->expectsOutput('Checked 1 expiring sessions.')
+            ->assertExitCode(0);
 
-        Event::assertDispatched('App\Events\SessionExpiringEvent', function ($event) use ($reservation) {
-            return $event->reservation->id === $reservation->id;
+        Event::assertDispatched(SessionExpiringEvent::class, function ($event) use ($reservation) {
+            return $event->reservation->id === $reservation->id && $event->remainingMinutes === 5;
         });
 
         $this->assertDatabaseHas('qm_notifications', [
-            'user_id' => $this->customer->id,
+            'user_id' => $customer->id,
+            'target_role' => 'customer',
+            'title' => 'Waktu Bermain Hampir Habis!',
+            'message' => 'Sisa waktu bermain di Meja VIP 1: 5 menit',
             'type' => 'session_expiring',
         ]);
     }
 
-    public function test_command_does_not_dispatch_event_for_session_expiring_in_30_minutes(): void
+    public function test_command_does_not_send_duplicate_notifications_within_10_minutes(): void
     {
         Event::fake();
+        $this->travelTo(now()->startOfSecond());
 
-        // Reservasi aktif yang akan habis 30 menit lagi
-        $reservation = Reservation::create([
-            'user_id' => $this->customer->id,
-            'billiard_table_id' => $this->table->id,
-            'billiard_package_id' => 1,
-            'reservation_code' => 'RSV-EXP-002',
-            'package_type' => 'regular',
-            'reservation_date' => Carbon::today()->format('Y-m-d'),
-            'start_time' => Carbon::now()->subMinutes(90)->format('H:i'),
-            'duration_minutes' => 120, // Sisa 30 menit
+        $customer = User::factory()->create(['role' => 'customer']);
+        $table = BilliardTable::factory()->create();
+        $package = BilliardPackage::factory()->create();
+
+        $reservation = Reservation::factory()->create([
+            'user_id' => $customer->id,
+            'billiard_table_id' => $table->id,
+            'billiard_package_id' => $package->id,
             'booking_status' => 'playing',
-            'actual_start_time' => Carbon::now()->subMinutes(90),
-            'payment_status' => 'paid',
+            'actual_start_time' => now()->subMinutes(55),
+            'duration_minutes' => 60,
         ]);
 
-        $this->artisan('billiard:check-expiring-sessions')->assertSuccessful();
+        // Run once
+        $this->artisan('billiard:check-expiring-sessions')
+            ->expectsOutput('Checked 1 expiring sessions.')
+            ->assertExitCode(0);
 
-        Event::assertNotDispatched('App\Events\SessionExpiringEvent');
+        Event::assertDispatched(SessionExpiringEvent::class, 1);
+
+        // Run again immediately (should hit cache and skip sending/inserting)
+        $this->artisan('billiard:check-expiring-sessions')
+            ->expectsOutput('Checked 1 expiring sessions.')
+            ->assertExitCode(0);
+
+        // Assert event was only dispatched once total
+        Event::assertDispatched(SessionExpiringEvent::class, 1);
         
-        $this->assertDatabaseMissing('qm_notifications', [
-            'user_id' => $this->customer->id,
-            'type' => 'session_expiring',
-        ]);
-    }
-
-    public function test_command_does_not_dispatch_duplicate_event_if_already_notified(): void
-    {
-        Event::fake();
-
-        $reservation = Reservation::create([
-            'user_id' => $this->customer->id,
-            'billiard_table_id' => $this->table->id,
-            'billiard_package_id' => 1,
-            'reservation_code' => 'RSV-EXP-003',
-            'package_type' => 'regular',
-            'reservation_date' => Carbon::today()->format('Y-m-d'),
-            'start_time' => Carbon::now()->subMinutes(115)->format('H:i'),
-            'duration_minutes' => 120,
-            'booking_status' => 'playing',
-            'actual_start_time' => Carbon::now()->subMinutes(115),
-            'payment_status' => 'paid',
-        ]);
-
-        // Simulasikan cache bahwa notifikasi sudah dikirim
-        $cacheKey = "session_expiring_notified:{$reservation->id}";
-        Cache::put($cacheKey, true, now()->addMinutes(10));
-
-        $this->artisan('billiard:check-expiring-sessions')->assertSuccessful();
-
-        Event::assertNotDispatched('App\Events\SessionExpiringEvent');
+        // Assert there is only one qm_notifications entry
+        $this->assertEquals(1, \App\Models\QmNotification::where('user_id', $customer->id)->where('type', 'session_expiring')->count());
     }
 
     public function test_customer_can_only_authenticate_own_private_channel(): void
     {
+        $customer = User::factory()->create(['role' => 'customer']);
+        
         // Tes otorisasi channel (Mensyaratkan Route::post('/broadcasting/auth'))
-        $response = $this->actingAs($this->customer)
+        $response = $this->actingAs($customer)
             ->post('/broadcasting/auth', [
-                'channel_name' => 'private-customer.' . $this->customer->id,
+                'channel_name' => 'private-customer.' . $customer->id,
                 'socket_id' => '12345.67890'
             ]);
 
@@ -132,7 +135,7 @@ class SessionExpiringNotificationTest extends TestCase
         $otherCustomer = User::factory()->create(['role' => 'customer']);
         $responseForbidden = $this->actingAs($otherCustomer)
             ->post('/broadcasting/auth', [
-                'channel_name' => 'private-customer.' . $this->customer->id,
+                'channel_name' => 'private-customer.' . $customer->id,
                 'socket_id' => '12345.67890'
             ]);
 

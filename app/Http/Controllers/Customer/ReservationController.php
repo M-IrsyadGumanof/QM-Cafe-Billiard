@@ -7,6 +7,7 @@ use App\Models\BilliardPackage;
 use App\Models\BilliardTable;
 use App\Models\QmNotification;
 use App\Models\Reservation;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -90,6 +91,35 @@ class ReservationController extends Controller
         abort_unless($reservation->user_id === auth()->id(), 403);
         return Inertia::render('Customer/ReservationDetail', [
             'reservation' => $reservation->load(['table','package','payments']),
+        ]);
+    }
+
+    /**
+     * API: Cek apakah customer memiliki sesi bermain yang sedang aktif.
+     * Digunakan oleh frontend untuk menampilkan countdown timer saat halaman pertama kali di-load.
+     */
+    public function activeSession(): JsonResponse
+    {
+        $session = Reservation::with(['table', 'package'])
+            ->where('user_id', auth()->id())
+            ->activePlaying()
+            ->first();
+
+        if (!$session) {
+            return response()->json(['active' => false]);
+        }
+
+        return response()->json([
+            'active' => true,
+            'reservation_id' => $session->id,
+            'reservation_code' => $session->reservation_code,
+            'table_name' => $session->table?->name,
+            'package_name' => $session->package?->name,
+            'remaining_minutes' => $session->remaining_minutes,
+            'end_time' => $session->end_time,
+            'start_time' => $session->start_time,
+            'actual_start_time' => $session->actual_start_time?->toIso8601String(),
+            'duration_minutes' => $session->duration_minutes,
         ]);
     }
 
