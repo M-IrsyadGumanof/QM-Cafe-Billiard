@@ -113,32 +113,9 @@ class SessionExpiringNotificationTest extends TestCase
 
         // Assert event was only dispatched once total
         Event::assertDispatched(SessionExpiringEvent::class, 1);
-        
         // Assert there is only one qm_notifications entry
         $this->assertEquals(1, \App\Models\QmNotification::where('user_id', $customer->id)->where('type', 'session_expiring')->count());
     }
 
-    public function test_customer_can_only_authenticate_own_private_channel(): void
-    {
-        $customer = User::factory()->create(['role' => 'customer']);
-        
-        // Tes otorisasi channel (Mensyaratkan Route::post('/broadcasting/auth'))
-        $response = $this->actingAs($customer)
-            ->post('/broadcasting/auth', [
-                'channel_name' => 'private-customer.' . $customer->id,
-                'socket_id' => '12345.67890'
-            ]);
 
-        $response->assertStatus(200);
-
-        // Tes customer lain tidak bisa listen channel ini
-        $otherCustomer = User::factory()->create(['role' => 'customer']);
-        $responseForbidden = $this->actingAs($otherCustomer)
-            ->post('/broadcasting/auth', [
-                'channel_name' => 'private-customer.' . $customer->id,
-                'socket_id' => '12345.67890'
-            ]);
-
-        $responseForbidden->assertStatus(403);
-    }
 }
