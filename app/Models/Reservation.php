@@ -28,12 +28,14 @@ class Reservation extends Model
         'booking_status',
         'payment_status',
         'notes',
+        'expiry_notified',
     ];
 
     protected $casts = [
         'reservation_date' => 'date',
         'actual_start_time' => 'datetime',
         'actual_end_time' => 'datetime',
+        'expiry_notified' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -54,5 +56,28 @@ class Reservation extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Scope: hanya reservasi yang sedang aktif bermain.
+     */
+    public function scopeActivePlaying($query)
+    {
+        return $query->where('booking_status', 'playing');
+    }
+
+    /**
+     * Accessor: hitung sisa waktu bermain dalam menit.
+     * Menghitung dari actual_start_time + duration_minutes.
+     */
+    public function getRemainingMinutesAttribute(): ?int
+    {
+        if (!$this->actual_start_time || !$this->duration_minutes) {
+            return null;
+        }
+
+        $endTime = $this->actual_start_time->addMinutes($this->duration_minutes);
+
+        return (int) max(0, now()->diffInMinutes($endTime, false));
     }
 }
