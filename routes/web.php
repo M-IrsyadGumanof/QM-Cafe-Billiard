@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BilliardPackageController as AdminBilliardPackageController;
 use App\Http\Controllers\Admin\BilliardTableController as AdminBilliardTableController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
@@ -76,6 +77,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::patch('/billiard-tables/{billiardTable}', [AdminBilliardTableController::class, 'update'])->name('billiard-tables.update');
         Route::delete('/billiard-tables/{billiardTable}', [AdminBilliardTableController::class, 'destroy'])->name('billiard-tables.destroy');
         Route::get('/table-schedule', [AdminBilliardTableController::class, 'schedule'])->name('table-schedule.index');
+
+        Route::get('/billiard-packages', [AdminBilliardPackageController::class, 'index'])->name('billiard-packages.index');
+        Route::post('/billiard-packages', [AdminBilliardPackageController::class, 'store'])->name('billiard-packages.store');
+        Route::patch('/billiard-packages/{billiardPackage}', [AdminBilliardPackageController::class, 'update'])->name('billiard-packages.update');
+        Route::delete('/billiard-packages/{billiardPackage}', [AdminBilliardPackageController::class, 'destroy'])->name('billiard-packages.destroy');
 
         Route::get('/bookings', [AdminReservationController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/{reservation}', [AdminReservationController::class, 'show'])->name('bookings.show');
