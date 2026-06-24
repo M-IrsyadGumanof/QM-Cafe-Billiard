@@ -45,7 +45,7 @@ export default function BilliardPackages({ packages }) {
                                 <h3 className="mt-4 text-xl font-extrabold text-white tracking-wide">{p.name}</h3>
                                 
                                 <p className={`mt-4 text-3xl font-black ${isPersonal ? 'text-emerald-400' : 'text-[#ffcc00]'}`}>
-                                    {isPersonal ? "Bayar Sesuai Jam" : money(p.price)}
+                                    {isPersonal ? `${money(p.price)} / Jam` : money(p.price)}
                                 </p>
                                 
                                 <p className="mt-4 text-xs leading-5 text-[#9aa7b3]">

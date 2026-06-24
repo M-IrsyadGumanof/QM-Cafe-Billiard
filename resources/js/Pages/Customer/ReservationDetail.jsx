@@ -95,16 +95,29 @@ export default function ReservationDetail({ reservation }) {
                 </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons / Payment Alert */}
             {reservation.payment_status !== "verified" &&
                 reservation.package_type === "regular" && (
-                    <div className="mt-6 flex flex-wrap gap-3">
+                    <div className="mt-8 rounded-[18px] border border-[#ffcc00]/25 bg-gradient-to-r from-[#ffcc00]/5 to-[#1a1711] p-6 flex flex-col md:flex-row items-center justify-between gap-5 shadow-[0_12px_40px_rgba(255,204,0,0.05)] animate-fade-in">
+                        <div className="flex items-start gap-4">
+                            <div className="rounded-xl bg-[#ffcc00]/10 p-3 text-[#ffcc00] border border-[#ffcc00]/20 flex items-center justify-center shrink-0">
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-extrabold text-white">Pembayaran Diperlukan</h4>
+                                <p className="text-xs text-[#9aa7b3] mt-1 leading-relaxed max-w-xl">
+                                    Silakan selesaikan pembayaran untuk mengamankan reservasi meja billiard Anda. Klik tombol di samping untuk mengunggah bukti transfer atau QRIS.
+                                </p>
+                            </div>
+                        </div>
                         <Link
                             href={`/customer/payments/upload?type=reservation&id=${reservation.id}`}
-                            className="inline-flex items-center gap-2 rounded-[10px] bg-[#ffcc00] px-5 py-3 text-xs font-bold text-[#151919] hover:bg-[#e6b800] transition-all duration-200 shadow-md shadow-black/20"
+                            className="inline-flex items-center justify-center gap-2.5 rounded-[12px] bg-[#ffcc00] px-5 py-3.5 text-xs font-black uppercase tracking-wider text-[#151919] hover:bg-[#ffe066] active:scale-95 transition-all duration-200 shadow-lg shadow-[#ffcc00]/10 hover:shadow-[#ffcc00]/20 shrink-0"
                         >
                             <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                             </svg>
                             Unggah Bukti Pembayaran
                         </Link>

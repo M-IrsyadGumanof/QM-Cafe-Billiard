@@ -55,4 +55,16 @@ class Reservation extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function scopeActivePlaying($query)
+    {
+        return $query->where('booking_status', 'playing');
+    }
+
+    public function getRemainingMinutesAttribute(): ?int
+    {
+        if (!$this->actual_start_time || !$this->duration_minutes) return null;
+        $endTime = $this->actual_start_time->copy()->addMinutes($this->duration_minutes);
+        return (int) max(0, now()->diffInMinutes($endTime, false));
+    }
 }
