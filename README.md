@@ -42,6 +42,17 @@ http://127.0.0.1:8000
 ```
 
 ## Catatan Database
+---
+
+## Tim Pengembang — Kelompok 2 TRPL 2C
+
+| Nama | NIM | Peran |
+|---|---:|---|
+| Muhammad Irsyad Gumanof | 2411082031 | Project Manager |
+| M. Galang Pratama | 2411081032 | System Analyst |
+| Suhafdal Zikri | 2411083018 | Lead Programmer |
+| Muhammad Ihqfal | 2411083013 | Lead Programmer 2 |
+| Febriansyah Putra | 2411081030 | Quality Assurance |
 
 Default `.env.example` memakai SQLite. Jika memakai MySQL, ubah konfigurasi database di `.env` sesuai database lokal.
 
