@@ -118,6 +118,18 @@ Untuk merapikan kode secara otomatis:
 
 ---
 
+## 👥 Tim Pengembang — Kelompok 2 TRPL 2C
+
+| Nama | NIM | Peran |
+|---|---:|---|
+| Muhammad Irsyad Gumanof | 2411082031 | Project Manager |
+| M. Galang Pratama | 2411081032 | System Analyst |
+| Suhafdal Zikri | 2411083018 | Lead Programmer |
+| Muhammad Ihqfal | 2411083013 | Lead Programmer 2 |
+| Febriansyah Putra | 2411081030 | Quality Assurance |
+
+---
+
 ## 📅 Dokumentasi Terkait
 Dokumentasi teknis proyek yang lebih mendalam dapat dibaca pada folder [docs/](file:///d:/Kampus/Semester%204%20Praktek/PBL/QM-Cafe-Billiard/docs):
 1. **[Panduan Instalasi Lengkap](file:///d:/Kampus/Semester%204%20Praktek/PBL/QM-Cafe-Billiard/docs/installation.md)**
