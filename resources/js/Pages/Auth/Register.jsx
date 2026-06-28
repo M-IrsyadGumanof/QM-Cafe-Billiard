@@ -4,8 +4,11 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Register() {
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -98,16 +101,43 @@ export default function Register() {
                 <div className="mt-4">
                     <InputLabel htmlFor="password" value="Password" />
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                        required
-                    />
+                    <div className="relative mt-1">
+                        <TextInput
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            value={data.password}
+                            className="block w-full pr-20"
+                            autoComplete="new-password"
+                            onChange={(e) => setData('password', e.target.value)}
+                            required
+                        />
+
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            className="absolute inset-y-0 right-0 flex items-center rounded-r-[7px] border border-transparent px-3 text-[#ffcc00] hover:bg-[#151919] hover:text-[#ffe17a] focus:outline-none focus:ring-2 focus:ring-[#ffcc00] focus:ring-offset-2 focus:ring-offset-[#151919]"
+                            aria-label={
+                                showPassword
+                                    ? "Sembunyikan password"
+                                    : "Tampilkan password"
+                            }
+                        >
+                            {showPassword ? (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" aria-hidden="true">
+                                    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            ) : (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" aria-hidden="true">
+                                    <path d="M3 3l18 18" />
+                                    <path d="M10.6 10.6A3 3 0 0 0 13.4 13.4" />
+                                    <path d="M9.1 5.1A10.9 10.9 0 0 1 12 4c6 0 9.5 6 9.5 6a17.7 17.7 0 0 1-4 4.3" />
+                                    <path d="M6.2 7.7A17.9 17.9 0 0 0 2.5 12s3.5 6 9.5 6c1.4 0 2.7-.2 3.9-.6" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
 
                     <InputError message={errors.password} className="mt-2" />
                 </div>
@@ -118,18 +148,45 @@ export default function Register() {
                         value="Confirm Password"
                     />
 
-                    <TextInput
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                        required
-                    />
+                    <div className="relative mt-1">
+                        <TextInput
+                            id="password_confirmation"
+                            type={showConfirmPassword ? "text" : "password"}
+                            name="password_confirmation"
+                            value={data.password_confirmation}
+                            className="block w-full pr-20"
+                            autoComplete="new-password"
+                            onChange={(e) =>
+                                setData('password_confirmation', e.target.value)
+                            }
+                            required
+                        />
+
+                        <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword((prev) => !prev)}
+                            className="absolute inset-y-0 right-0 flex items-center rounded-r-[7px] border border-transparent px-3 text-[#ffcc00] hover:bg-[#151919] hover:text-[#ffe17a] focus:outline-none focus:ring-2 focus:ring-[#ffcc00] focus:ring-offset-2 focus:ring-offset-[#151919]"
+                            aria-label={
+                                showConfirmPassword
+                                    ? "Sembunyikan konfirmasi password"
+                                    : "Tampilkan konfirmasi password"
+                            }
+                        >
+                            {showConfirmPassword ? (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" aria-hidden="true">
+                                    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            ) : (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" aria-hidden="true">
+                                    <path d="M3 3l18 18" />
+                                    <path d="M10.6 10.6A3 3 0 0 0 13.4 13.4" />
+                                    <path d="M9.1 5.1A10.9 10.9 0 0 1 12 4c6 0 9.5 6 9.5 6a17.7 17.7 0 0 1-4 4.3" />
+                                    <path d="M6.2 7.7A17.9 17.9 0 0 0 2.5 12s3.5 6 9.5 6c1.4 0 2.7-.2 3.9-.6" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
 
                     <InputError
                         message={errors.password_confirmation}
@@ -140,7 +197,7 @@ export default function Register() {
                 <div className="mt-4 flex items-center justify-end">
                     <Link
                         href={route('login')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="rounded-md text-sm text-[#ffcc00] underline hover:text-[#ffe17a] focus:outline-none focus:ring-2 focus:ring-[#ffcc00] focus:ring-offset-2 focus:ring-offset-[#151919]"
                     >
                         Already registered?
                     </Link>

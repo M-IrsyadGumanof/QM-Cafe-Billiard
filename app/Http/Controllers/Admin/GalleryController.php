@@ -61,6 +61,8 @@ class GalleryController extends Controller
                 Storage::disk('public')->delete($gallery->image);
             }
             $data['image'] = $request->file('image')->store('gallery', 'public');
+        } else {
+            unset($data['image']);
         }
 
         $gallery->update($data);

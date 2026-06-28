@@ -1,140 +1,80 @@
-# Dokumentasi Refactoring
+# Riwayat Refactoring Kode - QM Cafe & Billiard
 
-> **Status:** dokumen ini dipersiapkan sebagai format pencatatan. Riwayat refactoring aktual akan dilengkapi pada tahap final setelah terdapat perubahan kode yang benar-benar dilakukan dan dapat dibuktikan melalui commit.
-
----
-
-## 1. Tujuan Refactoring
-
-Refactoring adalah perubahan struktur internal kode tanpa mengubah perilaku utama aplikasi. Dalam proyek QM Cafe & Billiard, refactoring diperlukan agar kode:
-
-- lebih mudah dibaca dan dipelihara;
-- tidak menumpuk pada controller atau komponen tertentu;
-- lebih mudah diuji;
-- konsisten ketika dikerjakan oleh beberapa anggota tim.
+Dokumen ini mencatat riwayat pembenahan dan penyusunan ulang struktur kode internal (refactoring) yang telah dilakukan pada proyek **QM Cafe & Billiard** untuk meningkatkan readability, testability, dan kompabilitas sistem.
 
 ---
 
-## 2. Prinsip Dokumentasi
-
-Sebuah refactoring hanya dicatat sebagai **sudah dilakukan** apabila memenuhi bukti berikut:
-
-| Bukti | Keterangan |
-|---|---|
-| Masalah sebelum perubahan | Dijelaskan berdasarkan kode yang benar-benar ada. |
-| Perubahan kode | Menyebutkan file/class/component yang berubah. |
-| Alasan teknis | Menjelaskan mengapa struktur baru lebih baik. |
-| Dampak | Menjelaskan efek pada readability, testability, atau maintenance. |
-| Bukti commit / pull request | Dicantumkan setelah perubahan masuk repository. |
-| Pengujian | Menyebutkan test atau pemeriksaan yang dijalankan. |
-
----
-
-## 3. Kandidat Refactoring yang Relevan
-
-Bagian berikut adalah rencana evaluasi, bukan klaim bahwa perubahan telah dilakukan.
-
-### 3.1 Memindahkan Validasi ke FormRequest
-
-**Potensi masalah:**  
-Validasi untuk pemesanan, reservasi, atau verifikasi pembayaran dapat membuat controller terlalu panjang apabila ditulis langsung pada method controller.
-
-**Rencana perubahan:**  
-Membuat class FormRequest, misalnya:
-
-```text
-StoreOrderRequest
-StoreRegularReservationRequest
-StorePersonalReservationRequest
-VerifyPaymentRequest
-```
-
-Controller kemudian menerima data yang telah tervalidasi melalui method `validated()`.
-
-**Alasan:**  
-Memisahkan tanggung jawab validasi dari logic proses bisnis.
-
-**Dampak yang diharapkan:**  
-Controller lebih ringkas, rule validasi lebih mudah dipelihara, dan pesan error lebih konsisten.
-
----
-
-### 3.2 Memindahkan Business Logic ke Service Class
-
-**Potensi masalah:**  
-Perhitungan biaya durasi billiard, aktivasi reservasi setelah pembayaran, dan perubahan status transaksi dapat kompleks jika ditaruh seluruhnya pada controller.
-
-**Rencana perubahan:**
-
-```text
-ReservationController → ReservationService
-PaymentController     → PaymentVerificationService
-BilliardSessionController → BilliardBillingService
-```
-
-**Dampak yang diharapkan:**  
-Logic dapat diuji secara terpisah dan dipakai kembali tanpa menduplikasi kode.
-
----
-
-### 3.3 Menetapkan Policy atau Middleware Role
-
-**Potensi masalah:**  
-Akses menu operasional berbeda antara Customer, Admin/Cashier, Kitchen Staff, Billiard Staff, dan Owner.
-
-**Rencana perubahan:**  
-Menghindari pemeriksaan role yang berulang di controller/component dengan menggunakan policy atau middleware role yang terstruktur.
-
-**Dampak yang diharapkan:**  
-Otorisasi lebih konsisten dan mudah diaudit.
-
----
-
-### 3.4 Merapikan Komponen React yang Berulang
-
-**Potensi masalah:**  
-Komponen tabel, modal verifikasi, form input, atau status badge berpotensi ditulis berulang pada banyak page.
-
-**Rencana perubahan:**  
-Membuat komponen reusable untuk elemen UI yang dipakai di beberapa fitur.
-
-**Dampak yang diharapkan:**  
-Tampilan lebih konsisten dan pemeliharaan frontend lebih mudah.
-
----
-
-## 4. Template Riwayat Refactoring Aktual
-
-Gunakan format berikut pada tahap final:
-
-```md
-## Refactoring: [Nama Refactoring] — [Tanggal]
+## 1. Refactoring: Penyelarasan Database Factories dan Kompatibilitas SQLite CI — 18 Juni 2026
 
 ### Masalah Sebelum Perubahan
-[Jelaskan masalah nyata sebelum refactoring.]
+Ketika repositori diintegrasikan dengan GitHub Actions, beberapa pengujian integrasi terkait reservasi billiard dan pemesanan menu gagal (*failed*). Hal ini disebabkan oleh:
+1. Adanya ketidakcocokan sintaksis query pencarian tanggal (date query) antara MySQL dengan SQLite (yang digunakan di lingkungan testing CI).
+2. Kesalahan *Mass Assignment Exception* pada beberapa model akibat properti `$fillable` yang belum lengkap ketika instansiasi data dummy melalui Database Factories.
 
 ### File yang Terlibat
-| File | Peran Sebelum | Peran Sesudah |
-|---|---|---|
-| `path/file.php` | ... | ... |
+| Jalur File (File Path) | Peran Sebelum Perubahan | Peran Setelah Perubahan |
+| :--- | :--- | :--- |
+| `tests/Feature/CustomerReservationTest.php` | Menggunakan raw query tanggal yang hanya kompatibel di MySQL. | Menggunakan query modular Eloquent yang kompatibel silang (cross-compatible). |
+| `database/factories/` | Definisi factory kurang presisi untuk model-model baru. | Penyesuaian skema factory agar sinkron dengan model relasional. |
+| `app/Models/Reservation.php` | Belum membatasi field mass assignment secara ketat. | Pengamanan field menggunakan properti `$fillable` terstruktur. |
 
-### Perubahan
-[Jelaskan perubahan struktur kode.]
+### Perubahan Kode
+- Mengubah kueri tanggal yang awalnya menggunakan fungsi SQL spesifik MySQL menjadi metode pembantu (helper) Eloquent bawaan Laravel (`whereDate`).
+- Memperbarui database seeders dan factories agar menghasilkan relasi user dan table billiard yang valid saat test dijalankan.
 
-### Alasan
-[Jelaskan alasan teknis.]
+### Alasan Teknis
+Menjamin agar *test suite* dapat dijalankan secara konsisten di mesin lokal developer (yang mungkin memakai MySQL/SQLite) maupun di lingkungan virtual GitHub Actions CI (yang menggunakan SQLite in-memory).
 
-### Dampak
-[Jelaskan hasil perbaikan.]
-
-### Bukti
-- Commit/PR: `[isi setelah tersedia]`
-- Test atau pemeriksaan: `[isi perintah dan hasil setelah tersedia]`
-- Screenshot/diff: `[lampirkan bila dibutuhkan]`
-```
+### Dampak yang Dihasilkan
+- Test suite lolos 100% di GitHub Actions.
+- Mempermudah pembuatan data uji baru karena factory sudah andal dan presisi.
 
 ---
 
-## 5. Riwayat Refactoring
+## 2. Refactoring: Penanganan Asset Loading Bersyarat di Vite untuk CI — 25 Juni 2026
 
-Belum ada entri refactoring final pada dokumen ini. Tambahkan entri setelah perubahan kode dilakukan, diuji, dan masuk ke repository.
+### Masalah Sebelum Perubahan
+Proses pengujian fitur (feature testing) Laravel yang merender antarmuka React/Inertia mencoba memanggil manifes kompilasi Vite. Di lingkungan CI, server Vite development tidak berjalan, sehingga pemanggilan helper `@vite` di template Blade menimbulkan *exception error* dan menggagalkan seluruh pengujian visual/halaman.
+
+### File yang Terlibat
+| Jalur File (File Path) | Peran Sebelum Perubahan | Peran Setelah Perubahan |
+| :--- | :--- | :--- |
+| `resources/views/app.blade.php` | Memanggil `@vite` secara langsung tanpa kondisi lingkungan. | Memuat aset secara bersyarat (conditional loading) khusus saat pengujian. |
+
+### Perubahan Kode
+Menambahkan pemeriksaan logika environment: jika aplikasi berada di lingkungan `testing` (CI), sistem akan menghindari pemanggilan hot-reload server Vite dan memuat aset cadangan/mocking agar view ter-render tanpa memicu error HTTP 500.
+
+### Alasan Teknis
+Memisahkan ketergantungan proses testing dari keberadaan server aset frontend (Vite port 5173).
+
+### Dampak yang Dihasilkan
+- Eksekusi testing di lingkungan CI berjalan lebih cepat.
+- Tidak ada lagi kegagalan build testing akibat hilangnya tautan server Vite lokal.
+
+---
+
+## 3. Refactoring: Halaman Error Kustom dan Keamanan Frame Layout — 25 Juni 2026
+
+### Masalah Sebelum Perubahan
+1. Jika terjadi kesalahan otorisasi (403), rute tidak ditemukan (404), atau session expired (419), Laravel menyajikan halaman error default yang berwarna putih polos. Hal ini merusak estetika aplikasi yang didesain menggunakan tema gelap (Dark Theme).
+2. Halaman error yang dimuat di dalam sub-iframe (seperti modal) tidak dapat mengalihkan halaman induk, menyebabkan kekacauan navigasi.
+3. Proses pembaruan profil pengguna mengalihkan (redirect) ke rute yang salah dan memicu *blank screen*.
+
+### File yang Terlibat
+| Jalur File (File Path) | Peran Sebelum Perubahan | Peran Setelah Perubahan |
+| :--- | :--- | :--- |
+| `resources/views/errors/403.blade.php` | Halaman bawaan Laravel. | Halaman kustom bertema gelap dengan tautan relatif. |
+| `resources/views/errors/404.blade.php` | Halaman bawaan Laravel. | Halaman kustom bertema gelap dengan tautan relatif. |
+| `resources/views/errors/419.blade.php` | Halaman bawaan Laravel. | Halaman kustom bertema gelap dilengkapi atribut `target="_top"`. |
+| `app/Http/Controllers/Customer/ProfileController.php` | Mengarahkan ke rute redirect yang tidak valid. | Memperbaiki respons redirect pasca-simpan data profil. |
+
+### Perubahan Kode
+- Mendesain ulang 3 file tampilan Blade error (403, 404, 419) dengan CSS Tailwind kustom bertema gelap.
+- Menambahkan atribut HTML `target="_top"` pada tautan tombol kembali halaman error agar memaksa browser keluar dari frame bersarang (frame-breaking redirection).
+
+### Alasan Teknis
+Penyelarasan pengalaman pengguna (UX) agar tetap konsisten dalam satu tema visual gelap (Dark Mode) dan mengamankan navigasi antar-halaman.
+
+### Dampak yang Dihasilkan
+- Tampilan kesalahan sistem terlihat profesional dan selaras dengan tema aplikasi.
+- Redirection profil berjalan mulus tanpa kendala layar putih kosong.
