@@ -1,6 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 import Flash from "@/Components/Shared/Flash";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import SessionExpiringNotification from "@/Components/Shared/SessionExpiringNotification";
 
 const menuGroups = [
@@ -201,6 +201,19 @@ export default function CustomerLayout({ children }) {
     const { auth } = usePage().props;
     const path = window.location.pathname;
     const [isOpen, setIsOpen] = useState(false);
+    const navRef = useRef(null);
+
+    // Restore sidebar scroll position on load and path change
+    useEffect(() => {
+        const savedScroll = sessionStorage.getItem("customer_sidebar_scroll");
+        if (savedScroll && navRef.current) {
+            navRef.current.scrollTop = parseInt(savedScroll, 10);
+        }
+    }, [path]);
+
+    const handleScroll = (e) => {
+        sessionStorage.setItem("customer_sidebar_scroll", e.currentTarget.scrollTop);
+    };
 
     // Helper to determine if link is active
     const getActive = (h) => path === h || path.startsWith(h + "/");
@@ -257,7 +270,11 @@ export default function CustomerLayout({ children }) {
                     </Link>
 
                     {/* Nav Items */}
-                    <nav className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-5">
+                    <nav 
+                        ref={navRef}
+                        onScroll={handleScroll}
+                        className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-5"
+                    >
                         {menuGroups.map((group) => (
                             <div key={group.title}>
                                 <h3 className="px-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#4f5e5e] mb-2">
