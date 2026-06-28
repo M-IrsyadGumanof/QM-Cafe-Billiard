@@ -280,9 +280,13 @@ export default function PublicLayout({ children }) {
                     <div>
                         <p className="text-xs font-extrabold uppercase tracking-wider text-[#ffcc00]">Contact</p>
                         <p className="mt-3.5 text-xs leading-5 text-[#9aa7b3]">
-                            Padang, Sumatera Barat
+                            Jl. Lintas Sumatera No.km3, Sungai Kambut,
                             <br />
-                            WhatsApp: <span className="text-white font-extrabold font-mono hover:text-[#ffcc00] transition-colors">08xx-xxxx-xxxx</span>
+                            Kec. Pulau Punjung, Kab. Dharmasraya,
+                            <br />
+                            Sumatera Barat 27614
+                            <br />
+                            WhatsApp: <span className="text-white font-extrabold font-mono">0895-2443-4144</span>
                         </p>
                     </div>
                 </div>

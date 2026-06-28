@@ -120,5 +120,46 @@
             @endif
         </div>
     </div>
+
+    <script>
+        // Force top-level navigation for all anchor links with target="_top"
+        document.querySelectorAll('a[target="_top"]').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (window.top && window.top !== window) {
+                    window.top.location.href = this.href;
+                } else {
+                    window.location.href = this.href;
+                }
+            });
+        });
+
+        // Force top-level form submission for forms with target="_top"
+        document.querySelectorAll('form[target="_top"]').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (window.top && window.top !== window) {
+                    const topForm = window.top.document.createElement('form');
+                    topForm.action = this.action;
+                    topForm.method = this.method;
+                    topForm.style.display = 'none';
+
+                    const csrfToken = this.querySelector('input[name="_token"]');
+                    if (csrfToken) {
+                        const topCsrf = window.top.document.createElement('input');
+                        topCsrf.type = 'hidden';
+                        topCsrf.name = '_token';
+                        topCsrf.value = csrfToken.value;
+                        topForm.appendChild(topCsrf);
+                    }
+
+                    window.top.document.body.appendChild(topForm);
+                    topForm.submit();
+                } else {
+                    this.submit();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

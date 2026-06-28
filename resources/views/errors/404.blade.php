@@ -90,5 +90,19 @@
             </a>
         </div>
     </div>
+
+    <script>
+        // Force top-level navigation for all anchor links with target="_top"
+        document.querySelectorAll('a[target="_top"]').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (window.top && window.top !== window) {
+                    window.top.location.href = this.href;
+                } else {
+                    window.location.href = this.href;
+                }
+            });
+        });
+    </script>
 </body>
 </html>

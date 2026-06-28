@@ -104,22 +104,22 @@ export default function Home({
     return (
         <PublicLayout>
             {/* Hero Section Carousel */}
-            <section className="relative overflow-hidden rounded-[24px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#0f1212] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.4)] md:p-10 lg:p-16 min-h-[420px] flex items-center">
+            <section className="relative overflow-hidden rounded-[24px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#0f1212] px-6 py-6 shadow-[0_20px_50px_rgba(0,0,0,0.4)] md:px-10 md:py-8 lg:px-16 lg:py-10">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,204,0,0.08),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.02),transparent_20%)]" />
-                
+
                 {/* Arrow Controls */}
-                <button 
+                <button
                     onClick={prevSlide}
-                    className="absolute left-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-[#222727] bg-[#111515]/80 text-[#9aa7b3] hover:text-white hover:border-[#ffcc00]/30 transition-all active:scale-95"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-[#222727] bg-[#111515]/80 text-[#9aa7b3] hover:text-white hover:border-[#ffcc00]/30 transition-all active:scale-95"
                     aria-label="Previous Slide"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
-                <button 
+                <button
                     onClick={nextSlide}
-                    className="absolute right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-[#222727] bg-[#111515]/80 text-[#9aa7b3] hover:text-white hover:border-[#ffcc00]/30 transition-all active:scale-95"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-[#222727] bg-[#111515]/80 text-[#9aa7b3] hover:text-white hover:border-[#ffcc00]/30 transition-all active:scale-95"
                     aria-label="Next Slide"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -127,30 +127,30 @@ export default function Home({
                     </svg>
                 </button>
 
-                {/* Slides Container */}
-                <div className="relative w-full z-10">
+                {/* Slides Container - Stack slides using CSS Grid */}
+                <div className="relative w-full z-10 grid grid-cols-1 grid-rows-1">
                     {slides.map((slide, idx) => (
-                        <div 
-                            key={idx} 
-                            className={`flex flex-col lg:flex-row items-center gap-12 transition-all duration-700 ease-in-out ${
-                                idx === currentSlide 
-                                    ? "opacity-100 translate-x-0 relative pointer-events-auto" 
-                                    : "opacity-0 absolute translate-x-8 inset-0 pointer-events-none"
+                        <div
+                            key={idx}
+                            className={`col-start-1 row-start-1 flex flex-col lg:flex-row items-center lg:items-stretch gap-12 transition-opacity duration-700 ease-in-out ${
+                                idx === currentSlide
+                                    ? "opacity-100 pointer-events-auto"
+                                    : "opacity-0 pointer-events-none"
                             }`}
                         >
-                            <div className="flex-1 text-center lg:text-left space-y-6">
-                                <p className="inline-flex items-center rounded-full border border-[#ffcc00]/20 bg-[#ffcc00]/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.3em] text-[#ffcc00]">
+                            <div className={`flex-1 flex flex-col text-center lg:text-left gap-6 transition-transform duration-700 ease-in-out ${idx === currentSlide ? "translate-x-0" : "translate-x-8"}`}>
+                                <p className="inline-flex self-center lg:self-start items-center rounded-full border border-[#ffcc00]/20 bg-[#ffcc00]/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.3em] text-[#ffcc00]">
                                     {slide.subtitle}
                                 </p>
-                                
+
                                 <h1 className="text-4xl font-black leading-tight text-white md:text-5xl lg:text-6xl font-serif">
                                     {slide.title}
                                 </h1>
-                                
-                                <p className="max-w-xl text-sm leading-6 text-[#9aa7b3] md:text-base">
+
+                                <p className="max-w-xl flex-1 text-sm leading-6 text-[#9aa7b3] md:text-base">
                                     {slide.description}
                                 </p>
-                                
+
                                 <div className="flex flex-wrap justify-center lg:justify-start gap-3.5 pt-2">
                                     <Link
                                         href={slide.btnPrimary.href}
@@ -167,14 +167,14 @@ export default function Home({
                                 </div>
                             </div>
 
-                            <div className="hidden lg:flex flex-1 justify-center items-center">
+                            <div className={`hidden lg:flex flex-1 justify-center items-center transition-all duration-500 ease-in-out ${idx === currentSlide ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
                                 {slide.icon}
                             </div>
                         </div>
                     ))}
 
                     {/* Indicators */}
-                    <div className="mt-8 flex justify-center lg:justify-start gap-2.5">
+                    <div className="mt-8 flex justify-center lg:justify-start gap-2.5 z-20">
                         {slides.map((_, idx) => (
                             <button
                                 key={idx}

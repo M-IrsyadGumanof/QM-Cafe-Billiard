@@ -142,7 +142,7 @@ export default function Menu({ menus, categories, filters = {} }) {
                     {(menus || []).map((menu) => (
                         <article
                             key={menu.id}
-                            className="group rounded-2xl border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#ffcc00]/25 hover:shadow-xl hover:shadow-[#ffcc00]/5"
+                            className="group flex flex-col rounded-2xl border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#ffcc00]/25 hover:shadow-xl hover:shadow-[#ffcc00]/5"
                         >
                             {/* Visual Image Block */}
                             <div className="mb-5 h-48 rounded-xl bg-gradient-to-br from-[#ffcc00]/10 to-[#151919] border border-[#ffcc00]/5 flex items-center justify-center relative shadow-inner overflow-hidden transition-all duration-300 group-hover:from-[#ffcc00]/15">
@@ -159,34 +159,36 @@ export default function Menu({ menus, categories, filters = {} }) {
                                 )}
                             </div>
 
-                            <div className="flex items-start justify-between gap-3">
-                                <h3 className="font-extrabold text-base text-white tracking-wide leading-snug line-clamp-2">
-                                    {menu.name}
-                                </h3>
-                                <StatusBadge value={menu.status} />
-                            </div>
+                            {/* Card body — flex-1 so it stretches to fill available space */}
+                            <div className="flex flex-col flex-1">
+                                <div className="flex items-start justify-between gap-3">
+                                    <h3 className="font-extrabold text-base text-white tracking-wide leading-snug line-clamp-2">
+                                        {menu.name}
+                                    </h3>
+                                    <StatusBadge value={menu.status} />
+                                </div>
 
-                            <p className="mt-2 text-xs font-extrabold uppercase tracking-wider text-[#5b6e6e]">
-                                {menu.category?.name}
-                            </p>
-
-                            <p className="mt-4 text-xl font-black text-[#ffcc00]">
-                                {money(menu.price)}
-                            </p>
-
-                            {menu.description && (
-                                <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#9aa7b3]">
-                                    {menu.description}
+                                <p className="mt-2 text-xs font-extrabold uppercase tracking-wider text-[#5b6e6e]">
+                                    {menu.category?.name}
                                 </p>
-                            )}
 
-                            <div className="mt-5 pt-5 border-t border-[#222727]">
-                                <Link
-                                    href={`/menu/${menu.slug}`}
-                                    className="flex w-full items-center justify-center rounded-xl bg-[#ffcc00]/10 border border-[#ffcc00]/25 hover:bg-[#ffcc00] hover:text-[#151919] text-[#ffcc00] py-3 text-sm font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] text-center"
-                                >
-                                    Detail Menu
-                                </Link>
+                                <p className="mt-4 text-xl font-black text-[#ffcc00]">
+                                    {money(menu.price)}
+                                </p>
+
+                                {/* Description grows to fill remaining space, clamped to 2 lines */}
+                                <p className="mt-3 flex-1 line-clamp-2 text-sm leading-relaxed text-[#9aa7b3]">
+                                    {menu.description || ""}
+                                </p>
+
+                                <div className="mt-5 pt-5 border-t border-[#222727]">
+                                    <Link
+                                        href={`/menu/${menu.slug}`}
+                                        className="flex w-full items-center justify-center rounded-xl bg-[#ffcc00]/10 border border-[#ffcc00]/25 hover:bg-[#ffcc00] hover:text-[#151919] text-[#ffcc00] py-3 text-sm font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] text-center"
+                                    >
+                                        Detail Menu
+                                    </Link>
+                                </div>
                             </div>
                         </article>
                     ))}

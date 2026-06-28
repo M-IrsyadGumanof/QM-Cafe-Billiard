@@ -17,8 +17,8 @@ export default function Dashboard({ summary, orders, reservations }) {
             trend: "+12.4% Tren Positif",
             trendColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
             labels: ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"],
-            linePath: "M0,150 Q75,110 100,125 T200,75 T300,90 T400,45 T500,35 T600,15",
-            areaPath: "M0,150 Q75,110 100,125 T200,75 T300,90 T400,45 T500,35 T600,15 L600,180 L0,180 Z",
+            linePath: "M0,150 C30,150 70,125 100,125 C130,125 170,75 200,75 C230,75 270,90 300,90 C330,90 370,45 400,45 C430,45 470,35 500,35 C530,35 570,15 600,15",
+            areaPath: "M0,150 C30,150 70,125 100,125 C130,125 170,75 200,75 C230,75 270,90 300,90 C330,90 370,45 400,45 C430,45 470,35 500,35 C530,35 570,15 600,15 L600,180 L0,180 Z",
             dots: [
                 { cx: 100, cy: 125 },
                 { cx: 200, cy: 75 },
@@ -33,8 +33,8 @@ export default function Dashboard({ summary, orders, reservations }) {
             trend: "+8.7% Kenaikan",
             trendColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
             labels: ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"],
-            linePath: "M0,130 Q150,80 200,95 T400,35 T600,10",
-            areaPath: "M0,130 Q150,80 200,95 T400,35 T600,10 L600,180 L0,180 Z",
+            linePath: "M0,130 C60,130 140,95 200,95 C260,95 340,35 400,35 C460,35 540,10 600,10",
+            areaPath: "M0,130 C60,130 140,95 200,95 C260,95 340,35 400,35 C460,35 540,10 600,10 L600,180 L0,180 Z",
             dots: [
                 { cx: 200, cy: 95 },
                 { cx: 400, cy: 35 },
@@ -46,8 +46,8 @@ export default function Dashboard({ summary, orders, reservations }) {
             trend: "+15.2% Pertumbuhan",
             trendColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
             labels: ["Jan-Mar", "Apr-Jun", "Jul-Sep", "Okt-Des"],
-            linePath: "M0,140 Q150,50 300,70 T600,8",
-            areaPath: "M0,140 Q150,50 300,70 T600,8 L600,180 L0,180 Z",
+            linePath: "M0,140 C90,140 210,70 300,70 C390,70 510,8 600,8",
+            areaPath: "M0,140 C90,140 210,70 300,70 C390,70 510,8 600,8 L600,180 L0,180 Z",
             dots: [
                 { cx: 300, cy: 70 },
                 { cx: 600, cy: 8 }
@@ -213,11 +213,11 @@ export default function Dashboard({ summary, orders, reservations }) {
                 ))}
             </div>
 
-            {/* Charts & Actions Section */}
-            <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Charts Section */}
+            <div className="mt-8">
                 
-                {/* Left Column: Weekly Income Sparkline Chart Card */}
-                <div className="lg:col-span-2 rounded-2xl border border-[#2b3232]/50 bg-gradient-to-b from-[#181d1d] to-[#111515] p-6 shadow-xl relative">
+                {/* Weekly Income Sparkline Chart Card */}
+                <div className="rounded-2xl border border-[#2b3232]/50 bg-gradient-to-b from-[#181d1d] to-[#111515] p-6 shadow-xl relative">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#222727] pb-4 gap-3">
                         <div>
                             <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
@@ -310,87 +310,6 @@ export default function Dashboard({ summary, orders, reservations }) {
                         {chartData[timeRange].labels.map((lbl, idx) => (
                             <span key={idx}>{lbl}</span>
                         ))}
-                    </div>
-                </div>
-
-                {/* Right Column: Shortcuts & Quick Actions */}
-                <div className="rounded-2xl border border-[#2b3232]/50 bg-[#111515] p-6 shadow-xl flex flex-col justify-between">
-                    <div>
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4 border-b border-[#222727] pb-3 flex items-center gap-2">
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#ffcc00]" />
-                            Pintasan Cepat
-                        </h3>
-                        <p className="text-xs text-[#9aa7b3] leading-relaxed mb-6">
-                            Gunakan navigasi ini untuk melompat langsung ke halaman manajemen atau melihat status verifikasi.
-                        </p>
-                    </div>
-
-                    <div className="space-y-3.5">
-                        <Link
-                            href="/owner/reports"
-                            className="group flex items-center justify-between rounded-xl border border-[#2b3232]/50 bg-[#151919]/60 p-4 transition-all duration-300 hover:bg-[#1c2222] hover:border-[#ffcc00]/30"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="rounded-lg p-2 bg-[#ffcc00]/5 text-[#ffcc00] border border-[#ffcc00]/10 group-hover:scale-105 transition-transform">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                    </svg>
-                                </div>
-                                <div className="text-left">
-                                    <p className="text-xs font-bold text-white group-hover:text-[#ffcc00] transition-colors">
-                                        Analisis Penjualan
-                                    </p>
-                                    <p className="text-[9px] text-[#9aa7b3] mt-0.5">
-                                        Lihat & unduh file csv laporan bisnis
-                                    </p>
-                                </div>
-                            </div>
-                            <span className="text-[#9aa7b3] group-hover:text-white group-hover:translate-x-1 transition-all">&rarr;</span>
-                        </Link>
-
-                        <Link
-                            href="/admin/payments"
-                            className="group flex items-center justify-between rounded-xl border border-[#2b3232]/50 bg-[#151919]/60 p-4 transition-all duration-300 hover:bg-[#1c2222] hover:border-[#ffcc00]/30"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="rounded-lg p-2 bg-emerald-500/5 text-emerald-400 border border-emerald-500/10 group-hover:scale-105 transition-transform">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                    </svg>
-                                </div>
-                                <div className="text-left">
-                                    <p className="text-xs font-bold text-white group-hover:text-[#ffcc00] transition-colors">
-                                        Verifikasi Pembayaran
-                                    </p>
-                                    <p className="text-[9px] text-[#9aa7b3] mt-0.5">
-                                        Tinjau bukti transaksi masuk
-                                    </p>
-                                </div>
-                            </div>
-                            <span className="text-[#9aa7b3] group-hover:text-white group-hover:translate-x-1 transition-all">&rarr;</span>
-                        </Link>
-
-                        <Link
-                            href="/admin/menu"
-                            className="group flex items-center justify-between rounded-xl border border-[#2b3232]/50 bg-[#151919]/60 p-4 transition-all duration-300 hover:bg-[#1c2222] hover:border-[#ffcc00]/30"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="rounded-lg p-2 bg-amber-500/5 text-amber-400 border border-amber-500/10 group-hover:scale-105 transition-transform">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                    </svg>
-                                </div>
-                                <div className="text-left">
-                                    <p className="text-xs font-bold text-white group-hover:text-[#ffcc00] transition-colors">
-                                        Manajemen Menu Kafe
-                                    </p>
-                                    <p className="text-[9px] text-[#9aa7b3] mt-0.5">
-                                        Perbarui harga & stok hidangan
-                                    </p>
-                                </div>
-                            </div>
-                            <span className="text-[#9aa7b3] group-hover:text-white group-hover:translate-x-1 transition-all">&rarr;</span>
-                        </Link>
                     </div>
                 </div>
 
