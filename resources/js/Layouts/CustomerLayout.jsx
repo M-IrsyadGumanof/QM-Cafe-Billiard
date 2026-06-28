@@ -1,6 +1,7 @@
 import { Link, usePage } from "@inertiajs/react";
 import Flash from "@/Components/Shared/Flash";
 import { useState } from "react";
+import SessionExpiringNotification from "@/Components/Shared/SessionExpiringNotification";
 
 const menuGroups = [
     {
@@ -379,6 +380,7 @@ export default function CustomerLayout({ children }) {
                 {/* Content */}
                 <section className="p-6 flex-1 flex flex-col relative z-10">
                     <Flash />
+                    <SessionExpiringNotification />
                     {children}
                 </section>
             </main>
