@@ -45,6 +45,30 @@ Sistem telah menyelesaikan seluruh fase pengembangan MVP:
 
 ---
 
+## 📸 Screenshot Antarmuka Aplikasi
+
+### 🔑 Autentikasi
+| Halaman Login | Halaman Register |
+| :---: | :---: |
+| ![Halaman Login](docs/screenshots/Login/login.jpg) | ![Halaman Register](docs/screenshots/Login/register.jpg) |
+
+### 📊 Dasbor Peran (Multi-Role Dashboard)
+| Dasbor Customer | Dasbor Admin | Dasbor Owner |
+| :---: | :---: | :---: |
+| ![Dasbor Customer](docs/screenshots/Dashboard/customer.jpg) | ![Dasbor Admin](docs/screenshots/Dashboard/Admin.jpg) | ![Dasbor Owner](docs/screenshots/Dashboard/owner.jpg) |
+
+### 🌟 Fitur Utama & Layanan
+| Halaman Publik | Menu Kafe | Paket Billiard |
+| :---: | :---: | :---: |
+| ![Halaman Publik](docs/screenshots/Fitur%20Utama/Halaman%20public.jpg) | ![Halaman Menu](docs/screenshots/Fitur%20Utama/Halaman%20menu.jpg) | ![Paket Billiard](docs/screenshots/Fitur%20Utama/Halama%20paket%20billiard.jpg) |
+
+| Pemesanan Makanan | Reservasi Billiard | Verifikasi Pembayaran |
+| :---: | :---: | :---: |
+| ![Order Makanan](docs/screenshots/Fitur%20Utama/order%20makanan.jpg) | ![Reservasi Billiard](docs/screenshots/Fitur%20Utama/reservasi%20billiard.jpg) | ![Pembayaran](docs/screenshots/Fitur%20Utama/Payment.jpg) |
+
+---
+
+
 ## 🚀 Panduan Instalasi dan Menjalankan Proyek
 
 Ikuti langkah-langkah di bawah untuk menyiapkan lingkungan lokal:
@@ -131,10 +155,11 @@ Untuk merapikan kode secara otomatis:
 ---
 
 ## 📅 Dokumentasi Terkait
-Dokumentasi teknis proyek yang lebih mendalam dapat dibaca pada folder [docs/](file:///d:/Kampus/Semester%204%20Praktek/PBL/QM-Cafe-Billiard/docs):
-1. **[Panduan Instalasi Lengkap](file:///d:/Kampus/Semester%204%20Praktek/PBL/QM-Cafe-Billiard/docs/installation.md)**
-2. **[Spesifikasi Fitur Terpasang](file:///d:/Kampus/Semester%204%20Praktek/PBL/QM-Cafe-Billiard/docs/features.md)**
-3. **[Manajemen Dependensi Proyek](file:///d:/Kampus/Semester%204%20Praktek/PBL/QM-Cafe-Billiard/docs/dependency.md)**
-4. **[Dokumentasi Integrasi CI](file:///d:/Kampus/Semester%204%20Praktek/PBL/QM-Cafe-Billiard/docs/github-actions.md)**
-5. **[Riwayat Refactoring Kode](file:///d:/Kampus/Semester%204%20Praktek/PBL/QM-Cafe-Billiard/docs/refactoring.md)**
-6. **[Panduan Skenario Demo](file:///d:/Kampus/Semester%204%20Praktek/PBL/QM-Cafe-Billiard/docs/demo-guide.md)**
+Dokumentasi teknis proyek yang lebih mendalam dapat dibaca pada folder [docs/](docs/):
+1. **[Panduan Instalasi Lengkap](docs/installation.md)**
+2. **[Spesifikasi Fitur Terpasang](docs/features.md)**
+3. **[Manajemen Dependensi Proyek](docs/dependency.md)**
+4. **[Dokumentasi Integrasi CI](docs/github-actions.md)**
+5. **[Riwayat Refactoring Kode](docs/refactoring.md)**
+6. **[Panduan Skenario Demo](docs/demo-guide.md)**
+
