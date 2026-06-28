@@ -1,151 +1,91 @@
-# Dokumentasi Dependency Proyek
+# Dokumentasi Dependency Proyek - QM Cafe & Billiard
 
-Dokumen ini merangkum dependency pada proyek **Sistem Manajemen Pemesanan dan Reservasi QM Cafe & Billiard** serta rencana package untuk mendukung kebutuhan bisnis.
-
-> **Dasar verifikasi dependency terpasang:** file `composer.json` dan `package.json` pada branch `main` repository, diperiksa pada 29 Mei 2026. Package yang belum tercantum pada file tersebut ditulis sebagai **rencana** atau **opsional**, bukan sebagai dependency yang sudah digunakan.
+Dokumen ini merangkum seluruh paket dependensi (packages) backend dan frontend yang **benar-benar terpasang** pada proyek **QM Cafe & Billiard**, serta penyesuaian status terhadap rencana package awal.
 
 ---
 
-## 1. Dependency Backend yang Sudah Tercantum pada `composer.json`
+## 1. Dependensi Backend Aktual (`composer.json`)
 
-### Production Dependencies
+Berikut adalah daftar package PHP yang dipasang dan digunakan di backend Laravel:
 
-| Package | Versi Constraint | Fungsi dalam Proyek | Risiko / Catatan |
-|---|---:|---|---|
-| `php` | `^8.3` | Runtime aplikasi backend. | Mesin development/hosting wajib menggunakan versi kompatibel. |
-| `laravel/framework` | `^13.8` | Framework utama aplikasi. | Upgrade major dapat mengubah API atau konfigurasi. |
-| `inertiajs/inertia-laravel` | `^2.0` | Jembatan Laravel dengan page React melalui Inertia. | Perlu menjaga kompatibilitas frontend dan backend. |
-| `laravel/sanctum` | `^4.0` | Dukungan autentikasi berbasis token/API bila digunakan. | Konfigurasi token dan keamanan endpoint perlu diperhatikan. |
-| `laravel/tinker` | `^3.0` | Interaksi dengan aplikasi melalui console saat development. | Tidak digunakan sebagai fitur pengguna. |
-| `tightenco/ziggy` | `^2.0` | Menggunakan named route Laravel pada kode JavaScript/React. | Perubahan nama route dapat berdampak pada frontend. |
+### Production Dependencies (Aplikasi Utama)
 
-### Development Dependencies
+| Package | Versi Constraint | Fungsi Utama dalam Proyek | Catatan / Risiko |
+| :--- | :---: | :--- | :--- |
+| `php` | `^8.3` | Runtime utama backend (mendukung PHP 8.4 pada CI). | Server target harus menjalankan PHP minimal versi 8.3. |
+| `laravel/framework` | `^13.8` | Framework inti MVC aplikasi. | Pembaruan versi major memerlukan pemeriksaan ulang API yang digunakan. |
+| `inertiajs/inertia-laravel` | `^2.0` | Protokol transfer data dari controller Laravel ke views React. | Menghilangkan kebutuhan REST API tradisional untuk frontend. |
+| `laravel/sanctum` | `^4.0` | Autentikasi API berbasis token jika dibutuhkan di masa mendatang. | Saat ini auth berbasis cookie/session Inertia. |
+| `laravel/tinker` | `^3.0` | Konsol interaktif REPL untuk debug database via CLI. | Hanya untuk keperluan administratif pengembang. |
+| `tightenco/ziggy` | `^2.0` | Mengintegrasikan fungsi route named Laravel (`route('name')`) ke JSX. | Perubahan penamaan route pada laravel akan berdampak ke frontend. |
 
-| Package | Versi Constraint | Fungsi | Risiko / Catatan |
-|---|---:|---|---|
-| `laravel/breeze` | `^2.4` | Scaffolding autentikasi yang menghasilkan login, registrasi, reset password, dan verifikasi email. | Setelah scaffolding dibuat, perubahan UI/logic harus dipelihara tim. |
-| `laravel/pint` | `^1.27` | Menjaga konsistensi format kode PHP. | Jalankan sebelum merge agar style konsisten. |
-| `phpunit/phpunit` | `^12.5.12` | Automated testing backend. | Test harus ditambah seiring penambahan fitur. |
-| `fakerphp/faker` | `^1.23` | Membuat data dummy untuk factory/seeder/testing. | Hanya untuk development/testing. |
-| `mockery/mockery` | `^1.6` | Mocking object pada pengujian. | Hanya relevan untuk test. |
-| `nunomaduro/collision` | `^8.6` | Tampilan error console yang lebih informatif. | Dependency development. |
-| `laravel/pail` | `^1.2.5` | Membaca log aplikasi saat development. | Jangan digunakan sebagai pengganti monitoring produksi. |
-| `laravel/pao` | `^1.0.6` | Dependency development Laravel pada repository saat ini. | Fungsi spesifik perlu mengikuti dokumentasi package yang dipakai proyek. |
+### Development Dependencies (Alat Bantu Pengembangan & Pengujian)
 
----
-
-## 2. Dependency Frontend yang Sudah Tercantum pada `package.json`
-
-| Package | Versi Constraint | Fungsi | Risiko / Catatan |
-|---|---:|---|---|
-| `react` dan `react-dom` | `^18.2.0` | Membangun antarmuka pengguna. | Komponen harus dijaga konsistensi state dan routing-nya. |
-| `@inertiajs/react` | `^2.0.0` | Rendering page React yang terhubung dengan Laravel/Inertia. | Bergantung pada struktur response Laravel. |
-| `tailwindcss` | `^3.4.19` | Styling antarmuka. | Konsistensi desain perlu dijaga melalui komponen/konvensi tim. |
-| `vite` | `^8.0.0` | Build tool frontend. | Memerlukan Node.js yang kompatibel. |
-| `laravel-vite-plugin` | `^3.1` | Integrasi asset Vite dengan Laravel. | Perlu build asset saat deployment. |
-| `axios` | `^1.16.1` | HTTP client pada frontend. | Endpoint dan penanganan error harus diamankan. |
-| `@headlessui/react` | `^2.0.0` | Komponen UI aksesibel tanpa style bawaan. | Perlu styling dan testing interaksi. |
-| `@tailwindcss/forms` | `^0.5.3` | Style dasar elemen form. | Sesuaikan dengan desain aplikasi. |
+| Package | Versi Constraint | Fungsi Utama | Keterangan |
+| :--- | :---: | :--- | :--- |
+| `laravel/breeze` | `^2.4` | Scaffolding awal modul otentikasi. | Login, Register, & Forgot Password. |
+| `laravel/pint` | `^1.27` | Alat otomatis penyeragaman coding style PHP. | Dijalankan sebelum melakukan push/merge. |
+| `phpunit/phpunit` | `^12.5.12` | Automated testing framework untuk backend. | Berjalan otomatis di workflow GitHub Actions CI. |
+| `fakerphp/faker` | `^1.23` | Generator data tiruan untuk database seeder. | Digunakan pada testing database factories. |
+| `mockery/mockery` | `^1.6` | Mocking objek untuk pengujian unit. | Hanya aktif di lingkungan testing. |
+| `nunomaduro/collision` | `^8.6` | Mempercantik error screen saat terjadi bug di konsol. | Dependensi development saja. |
+| `laravel/pail` | `^1.2.5` | Membaca log Laravel secara real-time di terminal. | Dipanggil secara otomatis oleh script `composer dev`. |
+| `laravel/pao` | `^1.0.6` | Alat bantu internal tim development. | Penyelarasan format database & pengujian lokal. |
 
 ---
 
-## 3. Dependency yang Direncanakan Berdasarkan Kebutuhan Fitur
+## 2. Dependensi Frontend Aktual (`package.json`)
 
-Package berikut belum dinyatakan terpasang pada branch `main` ketika dokumen ini disusun. Instalasi hanya dilakukan setelah fitur terkait benar-benar disetujui dan mulai diimplementasikan.
+Berikut adalah daftar library JavaScript/React yang dipasang dan digunakan di frontend:
 
-| Package Rencana | Fitur yang Didukung | Alasan Pemilihan | Status | Risiko |
-|---|---|---|---|---|
-| `spatie/laravel-permission` | Role dan permission | Sistem memiliki Customer, Admin/Cashier, Kitchen Staff, Billiard Staff, dan Owner dengan akses berbeda. | Direkomendasikan | Konfigurasi role/middleware harus diuji dengan baik. |
-| `maatwebsite/excel` | Export laporan | Owner dapat mengunduh laporan dalam format spreadsheet apabila kebutuhan export disetujui. | Rencana | Kompatibilitas versi Laravel perlu diverifikasi sebelum install. |
-| `barryvdh/laravel-dompdf` | Cetak laporan atau struk PDF | Memudahkan penyediaan dokumen cetak. | Rencana | Rendering dokumen besar dapat menambah beban proses. |
-| `intervention/image` | Foto menu, galeri, bukti pembayaran | Mengatur ukuran dan kompresi file upload. | Rencana | Validasi file dan storage wajib diamankan. |
-| `spatie/laravel-activitylog` | Audit aktivitas | Mencatat perubahan penting pada pembayaran, reservasi, atau stok. | Rencana | Ukuran tabel log bertambah; perlu retensi data. |
-| `simplesoftwareio/simple-qrcode` | QR Code meja/menu | Hanya diperlukan apabila tim mempertahankan akses menu melalui QR Code sebagai fitur final. | Opsional | Jangan diinstal apabila kebutuhan QR Code dihapus. |
-
----
-
-## 4. Dependency yang Tidak Menjadi Prioritas pada Scope Saat Ini
-
-| Package / Integrasi | Alasan Tidak Menjadi Prioritas |
-|---|---|
-| HTTP client untuk payment gateway eksternal | Pembayaran transfer dan QRIS pada kebutuhan saat ini diverifikasi manual oleh Admin/Cashier, bukan terintegrasi otomatis dengan payment gateway. |
-| Debugbar tambahan | Repository telah memiliki sarana development seperti Laravel Pail; package debugging tambahan hanya dipasang bila benar-benar dibutuhkan tim. |
+| Package | Versi Constraint | Fungsi Utama dalam Proyek | Catatan / Status |
+| :--- | :---: | :--- | :--- |
+| `react` & `react-dom` | `^18.2.0` | Pustaka dasar pembangun antarmuka pengguna (UI). | State management lokal. |
+| `@inertiajs/react` | `^2.0.0` | Core adapter Inertia untuk komponen React. | Mengelola transisi halaman dan form posting. |
+| `tailwindcss` | `^3.4.19` | Framework CSS utilitas utama untuk styling. | Dikombinasikan dengan token desain tema gelap. |
+| `@tailwindcss/vite` | `^4.3.0` | Integrasi engine Tailwind dengan build tool Vite. | Mempercepat proses kompilasi asset CSS. |
+| `vite` | `^8.0.0` | Bundler dan development server frontend super cepat. | Berjalan berdampingan dengan server php artisan. |
+| `laravel-vite-plugin` | `^3.1` | Mengintegrasikan output build Vite dengan Blade Laravel. | Mengarahkan asset JS/CSS ke template blade. |
+| `axios` | `^1.16.1` | HTTP client untuk request AJAX manual ke server. | Digunakan untuk request di luar Inertia (bila ada). |
+| `@headlessui/react` | `^2.0.0` | Komponen interaktif tanpa style (Modal, Dropdown). | Untuk komponen UI aksesibel. |
+| `@tailwindcss/forms` | `^0.5.3` | Plugin penyeragaman style default input form CSS. | Untuk form input. |
+| `concurrently` | `^9.0.1` | Menjalankan beberapa perintah terminal sekaligus. | Digunakan untuk perintah `composer dev`. |
+| `autoprefixer` | `^10.4.12` | Otomatisasi prefix CSS vendor. | Diperlukan oleh Tailwind. |
+| `postcss` | `^8.4.31` | Pemrosesan file CSS pasca kompilasi. | Diperlukan oleh Tailwind. |
 
 ---
 
-## 5. Cara Memeriksa Dependency Aktual
+## 3. Penyesuaian Terhadap Rencana Awal Dependensi
 
-### Backend / Composer
+Berikut adalah perubahan keputusan arsitektur mengenai dependensi yang direncanakan sebelumnya:
 
+- **Laravel Reverb (Status: Terpasang & Aktif)**
+  - *Fungsi:* Digunakan sebagai WebSocket server lokal untuk event broadcasting real-time ketika durasi bermain billiard pelanggan tersisa 5 menit.
+- **Spatie Laravel Permission (Status: Dibatalkan / Menggunakan Custom Middleware)**
+  - *Keputusan:* Tim memutuskan untuk **tidak memasang** package ini guna menghindari kompleksitas database schema di SQLite. Sebagai gantinya, otorisasi peran menggunakan middleware custom bawaan (`RoleMiddleware.php`) dan pengecekan properti `role` langsung pada objek User.
+- **Maatwebsite Excel & Barryvdh Dompdf (Status: Ditunda / Menggunakan Browser Native)**
+  - *Keputusan:* Fitur ekspor laporan keuangan Owner diselesaikan menggunakan template tampilan HTML yang rapi dilengkapi CSS `@media print` sehingga Owner dapat mencetak langsung ke PDF secara native lewat browser tanpa membebani server backend.
+- **Spatie Activitylog (Status: Dibatalkan)**
+  - *Keputusan:* Audit log aktivitas admin dinilai di luar cakupan (out-of-scope) kebutuhan MVP saat ini.
+
+---
+
+## 4. Cara Memeriksa Dependensi Aktual
+
+### Memeriksa Dependensi Backend
 ```bash
 composer show
+```
+Untuk melihat dependensi yang memiliki pembaruan versi:
+```bash
 composer outdated
 ```
 
-### Frontend / NPM
-
+### Memeriksa Dependensi Frontend
 ```bash
 npm list --depth=0
+```
+Untuk melihat paket javascript yang out-of-date:
+```bash
 npm outdated
 ```
-
-Sebelum mendokumentasikan package sebagai “digunakan”, pastikan package tersebut tercantum pada `composer.json`, `composer.lock`, `package.json`, atau `package-lock.json`.
-
----
-
-## 6. Cara Instal Package Baru
-
-### Composer Package
-
-```bash
-composer require nama-vendor/nama-package
-```
-
-Untuk package development:
-
-```bash
-composer require --dev nama-vendor/nama-package
-```
-
-Contoh apabila role/permission mulai diimplementasikan:
-
-```bash
-composer require spatie/laravel-permission
-```
-
-### NPM Package
-
-```bash
-npm install nama-package
-```
-
-Setelah dependency berubah, dokumentasikan pada:
-
-1. `docs/dependency.md`;
-2. `CHANGELOG.md` bagian `Dependency`;
-3. commit Git dengan pesan yang menjelaskan package dan tujuan penggunaannya.
-
----
-
-## 7. Dampak Dependency pada Proyek
-
-### Dampak Positif
-
-- mempercepat implementasi fitur umum;
-- membantu menjaga kualitas kode dan testing;
-- mengurangi pembuatan fitur teknis dari nol.
-
-### Risiko
-
-- konflik versi dengan Laravel, PHP, React, atau Vite;
-- penambahan ukuran instalasi dan waktu build;
-- maintenance bergantung pada package pihak ketiga;
-- potensi celah keamanan pada dependency lama.
-
-### Strategi Mitigasi
-
-- hanya memasang package yang memiliki kebutuhan fitur jelas;
-- meninjau dokumentasi kompatibilitas sebelum instalasi;
-- mencatat setiap perubahan dependency dalam changelog;
-- menjalankan test dan build setelah perubahan dependency;
-- memeriksa dependency usang secara berkala.

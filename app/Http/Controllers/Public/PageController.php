@@ -22,7 +22,7 @@ class PageController extends Controller
                 'packages' => BilliardPackage::where('status', 'active')->count(),
             ],
             'galleries' => Gallery::where('status', 'active')->latest()->take(6)->get(),
-            'testimonials' => Testimonial::where('status', 'active')->latest()->take(3)->get(),
+            'testimonials' => Testimonial::with('user')->where('status', 'active')->latest()->take(3)->get(),
             'packages' => BilliardPackage::where('status', 'active')->orderBy('type')->take(3)->get(),
             'menus' => Menu::with('category')->where('status', 'available')->latest()->take(4)->get(),
         ]);
@@ -50,6 +50,6 @@ class PageController extends Controller
 
     public function testimonials(): Response
     {
-        return Inertia::render('Public/Testimonials', ['testimonials' => Testimonial::where('status','active')->latest()->get()]);
+        return Inertia::render('Public/Testimonials', ['testimonials' => Testimonial::with('user')->where('status','active')->latest()->get()]);
     }
 }
