@@ -1,5 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 import Flash from "@/Components/Shared/Flash";
+import { useEffect, useRef } from "react";
 
 const menuGroups = [
     {
@@ -82,6 +83,25 @@ const menuGroups = [
                             strokeLinejoin="round"
                             strokeWidth={2}
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                    </svg>
+                ),
+            },
+            {
+                label: "Billiard Packages",
+                href: "/admin/billiard-packages",
+                icon: (active) => (
+                    <svg
+                        className={`h-5 w-5 transition-colors duration-200 ${active ? "text-[#151919]" : "text-emerald-400"}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                     </svg>
                 ),
@@ -293,6 +313,19 @@ const menuGroups = [
 export default function AdminLayout({ children }) {
     const { auth } = usePage().props;
     const path = window.location.pathname;
+    const navRef = useRef(null);
+
+    // Restore sidebar scroll position on load and path change
+    useEffect(() => {
+        const savedScroll = sessionStorage.getItem("admin_sidebar_scroll");
+        if (savedScroll && navRef.current) {
+            navRef.current.scrollTop = parseInt(savedScroll, 10);
+        }
+    }, [path]);
+
+    const handleScroll = (e) => {
+        sessionStorage.setItem("admin_sidebar_scroll", e.currentTarget.scrollTop);
+    };
 
     // Helper to determine if link is active
     const getActive = (h) => path === h || path.startsWith(h + "/");
@@ -337,7 +370,11 @@ export default function AdminLayout({ children }) {
                     </Link>
 
                     {/* Nav Items */}
-                    <nav className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-5">
+                    <nav 
+                        ref={navRef}
+                        onScroll={handleScroll}
+                        className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-5"
+                    >
                         {menuGroups.map((group) => (
                             <div key={group.title}>
                                 <h3 className="px-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#4f5e5e] mb-2">
@@ -350,17 +387,16 @@ export default function AdminLayout({ children }) {
                                             <Link
                                                 key={item.href}
                                                 href={item.href}
-                                                className={`group flex items-center gap-3 rounded-[10px] px-3.5 py-2.5 text-xs font-bold transition-all duration-300 relative ${
-                                                    active
+                                                className={`group flex items-center gap-3 rounded-[10px] px-3.5 py-2.5 text-xs font-bold transition-all duration-300 relative ${active
                                                         ? "bg-[#ffcc00] text-[#151919] shadow-lg shadow-[#ffcc00]/10 font-extrabold"
                                                         : "text-[#9aa7b3] hover:bg-[#181d1d] hover:text-white"
-                                                }`}
+                                                    }`}
                                             >
                                                 {/* Active Left Indicator Bar */}
                                                 {active && (
                                                     <span className="absolute left-0 top-2.5 bottom-2.5 w-1 rounded-r bg-[#151919]" />
                                                 )}
-                                                
+
                                                 {/* Icon */}
                                                 <div className="shrink-0 transition-transform duration-300 group-hover:scale-110">
                                                     {item.icon(active)}
@@ -428,7 +464,7 @@ export default function AdminLayout({ children }) {
                             {activeLabel}
                         </h2>
                     </div>
-                    
+
                     <div className="flex items-center gap-3">
                         <div className="hidden sm:block text-right">
                             <p className="text-[10px] font-bold text-[#9aa7b3] uppercase">Panel Status</p>

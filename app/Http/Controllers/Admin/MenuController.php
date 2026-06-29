@@ -62,7 +62,12 @@ class MenuController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
+            if ($menu->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($menu->image);
+            }
             $data['image'] = $request->file('image')->store('menu', 'public');
+        } else {
+            unset($data['image']);
         }
 
         $menu->update($data);
@@ -74,6 +79,10 @@ class MenuController extends Controller
     {
         if ($menu->orderItems()->exists()) {
             return back()->with('error', 'Menu tidak dapat dihapus karena pernah dipesan oleh pelanggan.');
+        }
+
+        if ($menu->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($menu->image);
         }
 
         $menu->delete();

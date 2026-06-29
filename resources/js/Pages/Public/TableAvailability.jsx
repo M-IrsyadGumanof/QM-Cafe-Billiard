@@ -101,18 +101,16 @@ export default function TableAvailability({ tables }) {
                                     )}
 
                                     {/* CTA */}
-                                    <div className="mt-5 pt-4 border-t border-[#222727]">
-                                        <Link
-                                            href="/customer/reservations/create"
-                                            className={`flex w-full items-center justify-center rounded-[10px] py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] ${
-                                                isAvailable
-                                                    ? "bg-emerald-500 text-[#151919] hover:bg-emerald-400 shadow-lg shadow-emerald-500/10"
-                                                    : "bg-[#ffcc00]/10 border border-[#ffcc00]/25 text-[#ffcc00] hover:bg-[#ffcc00] hover:text-[#151919]"
-                                            }`}
-                                        >
-                                            {isLoggedIn ? "Reserve Now" : "Login to Book"}
-                                        </Link>
-                                    </div>
+                                    {isAvailable && (
+                                        <div className="mt-5 pt-4 border-t border-[#222727]">
+                                            <Link
+                                                href="/customer/reservations/create"
+                                                className="flex w-full items-center justify-center rounded-[10px] py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] bg-emerald-500 text-[#151919] hover:bg-emerald-400 shadow-lg shadow-emerald-500/10"
+                                            >
+                                                {isLoggedIn ? "Reserve Now" : "Login to Book"}
+                                            </Link>
+                                        </div>
+                                    )}
                                 </article>
                             );
                         })}

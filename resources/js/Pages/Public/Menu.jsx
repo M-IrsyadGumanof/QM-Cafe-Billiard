@@ -142,43 +142,53 @@ export default function Menu({ menus, categories, filters = {} }) {
                     {(menus || []).map((menu) => (
                         <article
                             key={menu.id}
-                            className="group rounded-2xl border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#ffcc00]/25 hover:shadow-xl hover:shadow-[#ffcc00]/5"
+                            className="group flex flex-col rounded-2xl border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#ffcc00]/25 hover:shadow-xl hover:shadow-[#ffcc00]/5"
                         >
                             {/* Visual Image Block */}
                             <div className="mb-5 h-48 rounded-xl bg-gradient-to-br from-[#ffcc00]/10 to-[#151919] border border-[#ffcc00]/5 flex items-center justify-center relative shadow-inner overflow-hidden transition-all duration-300 group-hover:from-[#ffcc00]/15">
-                                <svg className="w-14 h-14 text-[#ffcc00]/20 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
+                                {menu.image ? (
+                                    <img
+                                        src={`/storage/${menu.image}`}
+                                        alt={menu.name}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                ) : (
+                                    <svg className="w-14 h-14 text-[#ffcc00]/20 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                )}
                             </div>
 
-                            <div className="flex items-start justify-between gap-3">
-                                <h3 className="font-extrabold text-base text-white tracking-wide leading-snug line-clamp-2">
-                                    {menu.name}
-                                </h3>
-                                <StatusBadge value={menu.status} />
-                            </div>
+                            {/* Card body — flex-1 so it stretches to fill available space */}
+                            <div className="flex flex-col flex-1">
+                                <div className="flex items-start justify-between gap-3">
+                                    <h3 className="font-extrabold text-base text-white tracking-wide leading-snug line-clamp-2">
+                                        {menu.name}
+                                    </h3>
+                                    <StatusBadge value={menu.status} />
+                                </div>
 
-                            <p className="mt-2 text-xs font-extrabold uppercase tracking-wider text-[#5b6e6e]">
-                                {menu.category?.name}
-                            </p>
-
-                            <p className="mt-4 text-xl font-black text-[#ffcc00]">
-                                {money(menu.price)}
-                            </p>
-
-                            {menu.description && (
-                                <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#9aa7b3]">
-                                    {menu.description}
+                                <p className="mt-2 text-xs font-extrabold uppercase tracking-wider text-[#5b6e6e]">
+                                    {menu.category?.name}
                                 </p>
-                            )}
 
-                            <div className="mt-5 pt-5 border-t border-[#222727]">
-                                <Link
-                                    href={`/menu/${menu.slug}`}
-                                    className="flex w-full items-center justify-center rounded-xl bg-[#ffcc00]/10 border border-[#ffcc00]/25 hover:bg-[#ffcc00] hover:text-[#151919] text-[#ffcc00] py-3 text-sm font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] text-center"
-                                >
-                                    Detail Menu
-                                </Link>
+                                <p className="mt-4 text-xl font-black text-[#ffcc00]">
+                                    {money(menu.price)}
+                                </p>
+
+                                {/* Description grows to fill remaining space, clamped to 2 lines */}
+                                <p className="mt-3 flex-1 line-clamp-2 text-sm leading-relaxed text-[#9aa7b3]">
+                                    {menu.description || ""}
+                                </p>
+
+                                <div className="mt-5 pt-5 border-t border-[#222727]">
+                                    <Link
+                                        href={`/menu/${menu.slug}`}
+                                        className="flex w-full items-center justify-center rounded-xl bg-[#ffcc00]/10 border border-[#ffcc00]/25 hover:bg-[#ffcc00] hover:text-[#151919] text-[#ffcc00] py-3 text-sm font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] text-center"
+                                    >
+                                        Detail Menu
+                                    </Link>
+                                </div>
                             </div>
                         </article>
                     ))}

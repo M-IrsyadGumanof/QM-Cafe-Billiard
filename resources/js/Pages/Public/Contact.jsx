@@ -3,8 +3,8 @@ import PublicLayout from "@/Layouts/PublicLayout";
 const contactInfo = [
     {
         title: "Alamat",
-        detail: "Padang, Sumatera Barat",
-        sub: "Lokasi strategis di pusat kota",
+        detail: "Kab. Dharmasraya, Sumatera Barat",
+        sub: "Jl. Lintas Sumatera No.km3, Sungai Kambut, Kec. Pulau Punjung",
         icon: (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -24,7 +24,7 @@ const contactInfo = [
     },
     {
         title: "WhatsApp",
-        detail: "08xx-xxxx-xxxx",
+        detail: "0895-2443-4144",
         sub: "Fast response",
         icon: (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,7 +53,7 @@ export default function Contact() {
             {/* Contact Cards */}
             <div className="mt-10 grid gap-5 md:grid-cols-3">
                 {contactInfo.map((c) => (
-                    <article
+                    <div
                         key={c.title}
                         className="rounded-[18px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#ffcc00]/25 hover:shadow-lg group"
                     >
@@ -73,7 +73,7 @@ export default function Contact() {
                         <p className="mt-3 text-xs text-[#9aa7b3] leading-5">
                             {c.sub}
                         </p>
-                    </article>
+                    </div>
                 ))}
             </div>
 
@@ -89,7 +89,7 @@ export default function Contact() {
                         </h2>
                     </div>
                     <a
-                        href="https://wa.me/628xxxxxxxxxx"
+                        href="https://wa.me/6289524434144"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="rounded-[10px] bg-[#ffcc00] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#151919] hover:bg-[#ffe066] active:scale-95 transition-all duration-200 shadow-lg shadow-[#ffcc00]/10"
@@ -98,29 +98,40 @@ export default function Contact() {
                     </a>
                 </div>
 
-                {/* Stylized Map Placeholder */}
-                <div className="mt-6 relative overflow-hidden rounded-[18px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#0f1212] h-64 flex items-center justify-center">
+                {/* Interactive Map Link to Real Location */}
+                <a
+                    href="https://maps.app.goo.gl/EfcnJFczWtxoHJvy8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-6 relative overflow-hidden rounded-[18px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#0f1212] h-64 flex flex-col items-center justify-center group/map transition-all duration-300 hover:border-[#ffcc00]/30 hover:shadow-xl hover:shadow-[#ffcc00]/5 cursor-pointer block"
+                >
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,204,0,0.06),transparent_60%)]" />
                     {/* Decorative Grid Lines */}
                     <div className="absolute inset-0 opacity-[0.04]" style={{
                         backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
                         backgroundSize: "40px 40px"
                     }} />
-                    <div className="relative z-10 text-center">
-                        <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-[#ffcc00]/20 bg-[#ffcc00]/5 text-[#ffcc00] mb-3">
+                    <div className="relative z-10 text-center flex flex-col items-center">
+                        <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-[#ffcc00]/20 bg-[#ffcc00]/5 text-[#ffcc00] mb-3 group-hover/map:scale-110 group-hover/map:bg-[#ffcc00]/10 transition-all duration-300">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                             </svg>
                         </span>
-                        <p className="text-xs font-extrabold text-white uppercase tracking-wider">
+                        <p className="text-xs font-extrabold text-white uppercase tracking-wider group-hover/map:text-[#ffcc00] transition-colors">
                             QM Cafe & Billiard
                         </p>
-                        <p className="mt-1 text-[10px] text-[#5b6e6e]">
-                            Padang, Sumatera Barat
+                        <p className="mt-1 text-[10px] text-[#9aa7b3]">
+                            Jl. Lintas Sumatera No.km3, Sungai Kambut, Kec. Pulau Punjung, Kabupaten Dharmasraya, Sumatera Barat 27614
                         </p>
+                        <span className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#ffcc00]/10 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-[#ffcc00] border border-[#ffcc00]/20 group-hover/map:bg-[#ffcc00] group-hover/map:text-[#151919] transition-all duration-300">
+                            Buka di Google Maps
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </span>
                     </div>
-                </div>
+                </a>
             </section>
         </PublicLayout>
     );

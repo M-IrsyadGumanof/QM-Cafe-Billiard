@@ -38,7 +38,7 @@ export default function Reports({ summary, orders, reservations }) {
                         <button className="rounded-[10px] bg-[#ffcc00] px-4 py-2.5 text-xs font-bold text-[#151919] hover:bg-[#e6b800] transition-all duration-200">
                             Unduh Laporan (CSV) ▾
                         </button>
-                        <div className="absolute right-0 mt-1.5 w-48 rounded-[12px] border border-[#222727] bg-[#111515] py-2 shadow-xl opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto transition-all duration-200 z-50">
+                        <div className="absolute right-0 mt-1.5 w-48 rounded-[12px] border border-[#222727] bg-[#111515] py-2 shadow-xl opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto transition-all duration-200 z-50 before:absolute before:-top-1.5 before:left-0 before:right-0 before:h-1.5 before:content-['']">
                             <a
                                 href="/admin/reports/export?type=payments"
                                 download
