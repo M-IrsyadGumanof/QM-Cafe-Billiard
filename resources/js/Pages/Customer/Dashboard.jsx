@@ -2,12 +2,14 @@ import CustomerLayout from "@/Layouts/CustomerLayout";
 import StatusBadge from "@/Components/Shared/StatusBadge";
 import { money, date } from "@/Components/Shared/Format";
 import { Link } from "@inertiajs/react";
+import CountdownTimer from "@/Components/Shared/CountdownTimer";
 
 export default function Dashboard({
     summary,
     recentOrders,
     recentReservations,
     recentPayments,
+    activeSession,
 }) {
     const cardItems = [
         {
@@ -129,6 +131,41 @@ export default function Dashboard({
                     </Link>
                 </div>
             </div>
+
+            {activeSession && (
+                <div className="mt-6 rounded-[20px] border border-[#ffcc00]/20 bg-gradient-to-r from-[#181d1d] via-[#1c2222] to-[#111515] p-6 shadow-lg shadow-[#ffcc00]/5 relative overflow-hidden group animate-in fade-in slide-in-from-top-4 duration-300">
+                    {/* Background glow decorator */}
+                    <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#ffcc00]/5 rounded-full blur-2xl group-hover:bg-[#ffcc00]/8 transition-all duration-500" />
+                    
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#ffcc00]/10 border border-[#ffcc00]/20 text-[#ffcc00] animate-pulse">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <span className="rounded-full bg-[#ffcc00]/10 border border-[#ffcc00]/25 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#ffcc00] font-mono">
+                                    Sesi Bermain Aktif
+                                </span>
+                                <h2 className="mt-1.5 text-base font-extrabold text-white">
+                                    {activeSession.table?.name || "Meja Billiard"}
+                                </h2>
+                                <p className="text-xs text-[#9aa7b3] font-medium mt-0.5">
+                                    Paket: <span className="text-[#ffcc00] font-bold">{activeSession.package?.name || "Biasa"}</span> • Kode: <span className="font-mono text-slate-300 font-bold">{activeSession.reservation_code}</span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="w-full md:w-80 shrink-0 bg-[#0f1212]/50 p-4 rounded-xl border border-[#2b3232]/60">
+                            <CountdownTimer 
+                                startTime={activeSession.actual_start_time} 
+                                durationMinutes={activeSession.duration_minutes} 
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Stats Grid */}
             <div className="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-4">

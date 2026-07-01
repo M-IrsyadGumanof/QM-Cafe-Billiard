@@ -59,6 +59,49 @@ class Reservation extends Model
         return $this->hasMany(Payment::class);
     }
 
+    protected static function booted(): void
+    {
+        static::updating(function ($reservation) {
+            // Ketika status berubah menjadi playing
+            if ($reservation->isDirty('booking_status') && $reservation->booking_status === 'playing') {
+                if (!$reservation->actual_start_time) {
+                    $reservation->actual_start_time = now();
+                }
+                
+                // Ubah status meja menjadi occupied
+                if ($reservation->billiard_table_id) {
+                    BilliardTable::where('id', $reservation->billiard_table_id)
+                        ->update(['status' => 'occupied']);
+                }
+            }
+
+            // Ketika status berubah menjadi completed
+            if ($reservation->isDirty('booking_status') && $reservation->booking_status === 'completed') {
+                if (!$reservation->actual_end_time) {
+                    $reservation->actual_end_time = now();
+                }
+                if ($reservation->actual_start_time) {
+                    $reservation->actual_duration_minutes = (int) $reservation->actual_start_time->diffInMinutes($reservation->actual_end_time);
+                }
+                
+                // Ubah status meja menjadi available
+                if ($reservation->billiard_table_id) {
+                    BilliardTable::where('id', $reservation->billiard_table_id)
+                        ->update(['status' => 'available']);
+                }
+            }
+
+            // Ketika status berubah menjadi cancelled
+            if ($reservation->isDirty('booking_status') && $reservation->booking_status === 'cancelled') {
+                // Ubah status meja menjadi available
+                if ($reservation->billiard_table_id) {
+                    BilliardTable::where('id', $reservation->billiard_table_id)
+                        ->update(['status' => 'available']);
+                }
+            }
+        });
+    }
+
     // -------------------------------------------------------------------------
     // Scopes
     // -------------------------------------------------------------------------

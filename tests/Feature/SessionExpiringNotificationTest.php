@@ -117,4 +117,50 @@ class SessionExpiringNotificationTest extends TestCase
         // Assert there is only one qm_notifications entry
         $this->assertEquals(1, \App\Models\QmNotification::where('user_id', $customer->id)->where('type', 'session_expiring')->count());
     }
+
+    public function test_command_dispatches_event_and_stores_notification_when_session_expires(): void
+    {
+        Event::fake();
+        $this->travelTo(now()->startOfSecond());
+
+        $customer = User::factory()->create(['role' => 'customer']);
+        $table = BilliardTable::factory()->create(['name' => 'Meja VIP 1']);
+        $package = BilliardPackage::factory()->create();
+
+        // Expired session (duration 60, actual_start_time is 65 minutes ago, so remaining_minutes <= 0)
+        $reservation = Reservation::factory()->create([
+            'user_id' => $customer->id,
+            'billiard_table_id' => $table->id,
+            'billiard_package_id' => $package->id,
+            'booking_status' => 'playing',
+            'actual_start_time' => now()->subMinutes(65),
+            'duration_minutes' => 60,
+        ]);
+
+        $this->artisan('billiard:check-expiring-sessions')
+            ->assertExitCode(0);
+
+        Event::assertDispatched(\App\Events\SessionExpiredEvent::class, function ($event) use ($reservation) {
+            return $event->reservation->id === $reservation->id;
+        });
+
+        $this->assertDatabaseHas('qm_notifications', [
+            'user_id' => $customer->id,
+            'target_role' => 'customer',
+            'title' => 'Waktu Bermain Habis!',
+            'type' => 'session_expired',
+        ]);
+
+        $this->assertDatabaseHas('qm_notifications', [
+            'target_role' => 'admin',
+            'title' => 'Sesi Bermain Habis!',
+            'type' => 'session_expired',
+        ]);
+
+        $this->assertDatabaseHas('qm_notifications', [
+            'target_role' => 'billiard_staff',
+            'title' => 'Sesi Bermain Habis!',
+            'type' => 'session_expired',
+        ]);
+    }
 }
