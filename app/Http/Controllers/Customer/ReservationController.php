@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Events\SessionExpiredEvent;
 use App\Http\Controllers\Controller;
 use App\Models\BilliardPackage;
 use App\Models\BilliardTable;
@@ -19,15 +20,15 @@ class ReservationController extends Controller
     public function index(): Response
     {
         return Inertia::render('Customer/Reservations', [
-            'reservations' => auth()->user()->reservations()->with(['table','package'])->latest()->paginate(10),
+            'reservations' => auth()->user()->reservations()->with(['table', 'package'])->latest()->paginate(10),
         ]);
     }
 
     public function create(): Response
     {
         return Inertia::render('Customer/ReservationCreate', [
-            'tables' => BilliardTable::whereIn('status',['available','reserved'])->orderBy('table_number')->get(),
-            'packages' => BilliardPackage::where('status','active')->orderBy('type')->get(),
+            'tables' => BilliardTable::whereIn('status', ['available', 'reserved'])->orderBy('table_number')->get(),
+            'packages' => BilliardPackage::where('status', 'active')->orderBy('type')->get(),
         ]);
     }
 
@@ -43,7 +44,7 @@ class ReservationController extends Controller
         ]);
 
         $table = BilliardTable::findOrFail($validated['billiard_table_id']);
-        abort_if(in_array($table->status, ['occupied','maintenance'], true), 422, 'Meja sedang tidak tersedia.');
+        abort_if(in_array($table->status, ['occupied', 'maintenance'], true), 422, 'Meja sedang tidak tersedia.');
 
         $package = BilliardPackage::findOrFail($validated['billiard_package_id']);
         $duration = $package->type === 'regular' ? $package->duration_minutes : ($validated['duration_minutes'] ?? 60);
@@ -52,7 +53,7 @@ class ReservationController extends Controller
 
         $conflict = Reservation::where('billiard_table_id', $table->id)
             ->where('reservation_date', $validated['reservation_date'])
-            ->whereNotIn('booking_status', ['cancelled','completed'])
+            ->whereNotIn('booking_status', ['cancelled', 'completed'])
             ->where(function ($query) use ($validated, $end) {
                 $query->whereBetween('start_time', [$validated['start_time'], $end->format('H:i')])
                     ->orWhereBetween('end_time', [$validated['start_time'], $end->format('H:i')]);
@@ -89,8 +90,9 @@ class ReservationController extends Controller
     public function show(Reservation $reservation): Response
     {
         abort_unless($reservation->user_id === auth()->id(), 403);
+
         return Inertia::render('Customer/ReservationDetail', [
-            'reservation' => $reservation->load(['table','package','payments']),
+            'reservation' => $reservation->load(['table', 'package', 'payments']),
         ]);
     }
 
@@ -105,7 +107,7 @@ class ReservationController extends Controller
             ->activePlaying()
             ->first();
 
-        if (!$session) {
+        if (! $session) {
             return response()->json(['active' => false]);
         }
 
@@ -123,10 +125,55 @@ class ReservationController extends Controller
         ]);
     }
 
+    public function handleExpiredSession(Reservation $reservation): JsonResponse
+    {
+        abort_unless($reservation->user_id === auth()->id(), 403);
+
+        if ($reservation->booking_status === 'playing') {
+            $cacheKey = "session_expired_notified:{$reservation->id}";
+            if (! cache()->has($cacheKey)) {
+                cache()->put($cacheKey, true, now()->addDay());
+
+                // Customer notification
+                QmNotification::create([
+                    'user_id' => $reservation->user_id,
+                    'target_role' => 'customer',
+                    'title' => 'WAKTU BERMAIN SELESAI',
+                    'message' => "Waktu bermain Anda di {$reservation->table?->name} telah habis!",
+                    'type' => 'session_expired',
+                    'is_read' => false,
+                ]);
+
+                // Admin notification
+                QmNotification::create([
+                    'target_role' => 'admin',
+                    'title' => 'Sesi Bermain Habis',
+                    'message' => "Sesi bermain customer {$reservation->user?->name} di {$reservation->table?->name} telah habis.",
+                    'type' => 'session_expired',
+                    'is_read' => false,
+                ]);
+
+                // Billiard Staff notification
+                QmNotification::create([
+                    'target_role' => 'billiard_staff',
+                    'title' => 'Sesi Bermain Habis',
+                    'message' => "Sesi bermain customer {$reservation->user?->name} di {$reservation->table?->name} telah habis.",
+                    'type' => 'session_expired',
+                    'is_read' => false,
+                ]);
+
+                event(new SessionExpiredEvent($reservation));
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
     private function generateReservationCode(): string
     {
         $prefix = 'RSV-'.now()->format('Ymd').'-';
-        $number = Reservation::where('reservation_code','like',$prefix.'%')->count() + 1;
-        return $prefix.str_pad((string)$number, 4, '0', STR_PAD_LEFT);
+        $number = Reservation::where('reservation_code', 'like', $prefix.'%')->count() + 1;
+
+        return $prefix.str_pad((string) $number, 4, '0', STR_PAD_LEFT);
     }
 }

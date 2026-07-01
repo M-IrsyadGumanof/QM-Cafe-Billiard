@@ -1,5 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 import Flash from "@/Components/Shared/Flash";
+import { useEffect, useRef } from "react";
 
 const menuGroups = [
     {
@@ -312,6 +313,19 @@ const menuGroups = [
 export default function AdminLayout({ children }) {
     const { auth } = usePage().props;
     const path = window.location.pathname;
+    const navRef = useRef(null);
+
+    // Restore sidebar scroll position on load and path change
+    useEffect(() => {
+        const savedScroll = sessionStorage.getItem("admin_sidebar_scroll");
+        if (savedScroll && navRef.current) {
+            navRef.current.scrollTop = parseInt(savedScroll, 10);
+        }
+    }, [path]);
+
+    const handleScroll = (e) => {
+        sessionStorage.setItem("admin_sidebar_scroll", e.currentTarget.scrollTop);
+    };
 
     // Helper to determine if link is active
     const getActive = (h) => path === h || path.startsWith(h + "/");
@@ -356,7 +370,11 @@ export default function AdminLayout({ children }) {
                     </Link>
 
                     {/* Nav Items */}
-                    <nav className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-5">
+                    <nav 
+                        ref={navRef}
+                        onScroll={handleScroll}
+                        className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-5"
+                    >
                         {menuGroups.map((group) => (
                             <div key={group.title}>
                                 <h3 className="px-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#4f5e5e] mb-2">
@@ -369,17 +387,16 @@ export default function AdminLayout({ children }) {
                                             <Link
                                                 key={item.href}
                                                 href={item.href}
-                                                className={`group flex items-center gap-3 rounded-[10px] px-3.5 py-2.5 text-xs font-bold transition-all duration-300 relative ${
-                                                    active
+                                                className={`group flex items-center gap-3 rounded-[10px] px-3.5 py-2.5 text-xs font-bold transition-all duration-300 relative ${active
                                                         ? "bg-[#ffcc00] text-[#151919] shadow-lg shadow-[#ffcc00]/10 font-extrabold"
                                                         : "text-[#9aa7b3] hover:bg-[#181d1d] hover:text-white"
-                                                }`}
+                                                    }`}
                                             >
                                                 {/* Active Left Indicator Bar */}
                                                 {active && (
                                                     <span className="absolute left-0 top-2.5 bottom-2.5 w-1 rounded-r bg-[#151919]" />
                                                 )}
-                                                
+
                                                 {/* Icon */}
                                                 <div className="shrink-0 transition-transform duration-300 group-hover:scale-110">
                                                     {item.icon(active)}
@@ -447,7 +464,7 @@ export default function AdminLayout({ children }) {
                             {activeLabel}
                         </h2>
                     </div>
-                    
+
                     <div className="flex items-center gap-3">
                         <div className="hidden sm:block text-right">
                             <p className="text-[10px] font-bold text-[#9aa7b3] uppercase">Panel Status</p>

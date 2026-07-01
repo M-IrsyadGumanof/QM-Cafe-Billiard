@@ -1,8 +1,27 @@
 import BilliardLayout from "@/Layouts/BilliardLayout";
 import StatusBadge from "@/Components/Shared/StatusBadge";
+import CountdownTimer from "@/Components/Shared/CountdownTimer";
+import { useState } from "react";
 
 export default function PlayingSessions({ reservations }) {
-    const rows = reservations || [];
+    const [expiredSessions, setExpiredSessions] = useState([]);
+
+    const handleSessionFinished = (id) => {
+        setExpiredSessions((prev) => [...prev, id]);
+    };
+
+    const visibleSessions = (reservations || []).filter((r) => {
+        const startTimestamp = new Date(r.actual_start_time).getTime();
+        const totalDurationMs = r.duration_minutes * 60 * 1000;
+        const endTimestamp = startTimestamp + totalDurationMs;
+        
+        // Filter out if already expired on load
+        if (Date.now() >= endTimestamp) {
+            return false;
+        }
+        // Filter out if expired live
+        return !expiredSessions.includes(r.id);
+    });
 
     return (
         <BilliardLayout>
@@ -21,8 +40,8 @@ export default function PlayingSessions({ reservations }) {
 
             {/* Sessions Grid */}
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {rows.length > 0 ? (
-                    rows.map((r) => (
+                {visibleSessions.length > 0 ? (
+                    visibleSessions.map((r) => (
                         <div
                             key={r.id}
                             className="rounded-[15px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-5 shadow-sm flex flex-col justify-between transition-all duration-300 hover:border-[#ffcc00]/10 hover:shadow-lg"
@@ -58,6 +77,15 @@ export default function PlayingSessions({ reservations }) {
                                             {r.start_time?.substring(0, 5)} - {r.end_time?.substring(0, 5)}
                                         </span>
                                     </div>
+                                    {r.booking_status === 'playing' && r.actual_start_time && (
+                                        <div className="mt-3 pt-3 border-t border-[#222727] w-full">
+                                            <CountdownTimer 
+                                                startTime={r.actual_start_time} 
+                                                durationMinutes={r.duration_minutes} 
+                                                onFinish={() => handleSessionFinished(r.id)}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

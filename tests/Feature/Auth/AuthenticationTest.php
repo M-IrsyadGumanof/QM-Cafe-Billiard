@@ -21,9 +21,12 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
+        session(['captcha' => 'abc123']);
+
         $response = $this->post('/login', [
             'email' => $user->email,
             'password' => 'password',
+            'captcha' => 'abc123',
         ]);
 
         $this->assertAuthenticated();
@@ -34,12 +37,47 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
+        session(['captcha' => 'abc123']);
+
         $this->post('/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
+            'captcha' => 'abc123',
         ]);
 
         $this->assertGuest();
+    }
+
+    public function test_users_can_not_authenticate_with_invalid_captcha(): void
+    {
+        $user = User::factory()->create();
+
+        session(['captcha' => 'abc123']);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+            'captcha' => 'wrong-captcha',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors('captcha');
+    }
+
+    public function test_users_can_not_authenticate_with_incorrect_case_captcha(): void
+    {
+        $user = User::factory()->create();
+
+        session(['captcha' => 'ABC123']);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+            'captcha' => 'abc123',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors('captcha');
     }
 
     public function test_users_can_logout(): void

@@ -6,6 +6,24 @@ Format kategori yang digunakan: `Added` (Ditambahkan), `Changed` (Diubah), `Fixe
 
 ---
 
+## [0.7.0] - 2026-07-02
+
+### Added
+- Fitur modal pemotongan gambar kustom (crop, zoom, drag) pada tambah/edit menu dan galeri admin.
+
+### Changed
+- Sesi bermain aktif yang telah selesai durasi bermainnya akan disembunyikan secara otomatis dari daftar dashboard secara real-time.
+- Layout halaman register disederhanakan menjadi satu halaman responsif tanpa scrolling.
+- Peningkatan batas ukuran unggah avatar profil menjadi maksimal 10MB.
+
+### Fixed
+- Perbaikan susunan dan label field input teks bertumpuk pada form Login dan Register.
+- Perbaikan ikon tombol refresh captcha pada form login agar tidak mengalami distorsi layout.
+- Perbaikan bug penghapusan gambar pada database dan penyimpanan disk server saat Admin mengedit item Menu atau Galeri.
+
+### Refactor
+- Standardisasi penulisan seluruh berkas PHP menggunakan Laravel Pint (kepatuhan standar PSR-12).
+
 ## [0.6.0] - 2026-06-25
 
 ### Added

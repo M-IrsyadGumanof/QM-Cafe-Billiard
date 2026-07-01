@@ -2,10 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Reservation;
-use App\Models\QmNotification;
+use App\Events\SessionExpiredEvent;
 use App\Events\SessionExpiringEvent;
+use App\Models\QmNotification;
+use App\Models\Reservation;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
 class CheckExpiringSessionsCommand extends Command
@@ -22,7 +23,7 @@ class CheckExpiringSessionsCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Check for billiard sessions expiring in 5 minutes and send notifications';
+    protected $description = 'Check for billiard sessions expiring or expired and send notifications';
 
     /**
      * Execute the console command.
@@ -31,19 +32,21 @@ class CheckExpiringSessionsCommand extends Command
     {
         $reservations = Reservation::with(['user', 'table', 'package'])
             ->activePlaying()
-            ->get()
-            ->filter(function ($reservation) {
-                $remaining = $reservation->remaining_minutes;
-                // Notifikasi saat tersisa 5 menit (antara 4-5 menit, agar tidak duplikat)
-                return $remaining !== null && $remaining <= 5 && $remaining >= 4;
-            });
+            ->get();
 
-        foreach ($reservations as $reservation) {
+        // 1. Sesi yang hampir habis (4-5 menit tersisa)
+        $expiring = $reservations->filter(function ($reservation) {
+            $remaining = $reservation->remaining_minutes;
+
+            return $remaining !== null && $remaining <= 5 && $remaining >= 4;
+        });
+
+        foreach ($expiring as $reservation) {
             // Cek apakah notifikasi sudah dikirim (pakai cache untuk hindari duplikat)
             $cacheKey = "session_expiring_notified:{$reservation->id}";
-            if (!Cache::has($cacheKey)) {
+            if (! Cache::has($cacheKey)) {
                 event(new SessionExpiringEvent($reservation, $reservation->remaining_minutes));
-                
+
                 // Simpan juga ke database QmNotification
                 QmNotification::create([
                     'user_id' => $reservation->user_id,
@@ -58,6 +61,50 @@ class CheckExpiringSessionsCommand extends Command
             }
         }
 
-        $this->info("Checked {$reservations->count()} expiring sessions.");
+        // 2. Sesi yang telah habis (0 menit atau kurang tersisa)
+        $expired = $reservations->filter(function ($reservation) {
+            $remaining = $reservation->remaining_minutes;
+
+            return $remaining !== null && $remaining <= 0;
+        });
+
+        foreach ($expired as $reservation) {
+            $expiredCacheKey = "session_expired_notified:{$reservation->id}";
+            if (! Cache::has($expiredCacheKey)) {
+                // Notifikasi untuk customer
+                QmNotification::create([
+                    'user_id' => $reservation->user_id,
+                    'target_role' => 'customer',
+                    'title' => 'Waktu Bermain Habis!',
+                    'message' => "Waktu bermain Anda di {$reservation->table?->name} telah habis. Terima kasih!",
+                    'type' => 'session_expired',
+                ]);
+
+                // Notifikasi untuk admin
+                QmNotification::create([
+                    'target_role' => 'admin',
+                    'title' => 'Sesi Bermain Habis!',
+                    'message' => "Sesi bermain di {$reservation->table?->name} (Reservasi: {$reservation->reservation_code}) telah habis.",
+                    'type' => 'session_expired',
+                ]);
+
+                // Notifikasi untuk billiard staff
+                QmNotification::create([
+                    'target_role' => 'billiard_staff',
+                    'title' => 'Sesi Bermain Habis!',
+                    'message' => "Sesi bermain di {$reservation->table?->name} (Reservasi: {$reservation->reservation_code}) telah habis.",
+                    'type' => 'session_expired',
+                ]);
+
+                // Broadcast event ke customer channel
+                event(new SessionExpiredEvent($reservation));
+
+                // Cache 24 jam agar tidak kirim duplikat untuk sesi yang sama
+                Cache::put($expiredCacheKey, true, now()->addHours(24));
+            }
+        }
+
+        $this->info("Checked {$expiring->count()} expiring sessions.");
+        $this->info("Checked {$expired->count()} expired sessions.");
     }
 }

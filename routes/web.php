@@ -66,7 +66,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::post('/menu', [AdminMenuController::class, 'store'])->name('menu.store');
         Route::patch('/menu/{menu}', [AdminMenuController::class, 'update'])->name('menu.update');
         Route::delete('/menu/{menu}', [AdminMenuController::class, 'destroy'])->name('menu.destroy');
-        
+
         Route::get('/menu-categories', [AdminMenuCategoryController::class, 'index'])->name('menu-categories.index');
         Route::post('/menu-categories', [AdminMenuCategoryController::class, 'store'])->name('menu-categories.store');
         Route::patch('/menu-categories/{menuCategory}', [AdminMenuCategoryController::class, 'update'])->name('menu-categories.update');
@@ -140,6 +140,7 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::get('/notifications', [CustomerNotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/{notification}/read', [CustomerNotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::get('/active-session', [CustomerReservationController::class, 'activeSession'])->name('active-session');
+    Route::post('/reservations/{reservation}/expired', [CustomerReservationController::class, 'handleExpiredSession'])->name('reservations.expired');
 });
 
 Route::middleware(['auth', 'verified', 'role:kitchen_staff'])->prefix('kitchen')->name('kitchen.')->group(function () {

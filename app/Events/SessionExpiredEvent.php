@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class SessionExpiringEvent implements ShouldBroadcast
+class SessionExpiredEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -18,8 +18,7 @@ class SessionExpiringEvent implements ShouldBroadcast
      * Create a new event instance.
      */
     public function __construct(
-        public Reservation $reservation,
-        public int $remainingMinutes
+        public Reservation $reservation
     ) {}
 
     /**
@@ -46,18 +45,16 @@ class SessionExpiringEvent implements ShouldBroadcast
             'reservation_id' => $this->reservation->id,
             'reservation_code' => $this->reservation->reservation_code,
             'table_name' => $this->reservation->table?->name,
-            'remaining_minutes' => $this->remainingMinutes,
             'end_time' => $this->reservation->end_time,
-            'message' => "Waktu bermain di {$this->reservation->table?->name} tersisa {$this->remainingMinutes} menit!",
+            'message' => "Waktu bermain Anda di {$this->reservation->table?->name} telah habis!",
         ];
     }
 
     /**
-     * Nama event yang diterima di frontend (default: nama class).
-     * Frontend akan listen: channel.listen('SessionExpiringEvent', ...)
+     * Nama event yang diterima di frontend.
      */
     public function broadcastAs(): string
     {
-        return 'SessionExpiringEvent';
+        return 'SessionExpiredEvent';
     }
 }

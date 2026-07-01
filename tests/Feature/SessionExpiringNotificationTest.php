@@ -2,14 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Events\SessionExpiredEvent;
+use App\Events\SessionExpiringEvent;
 use App\Models\BilliardPackage;
 use App\Models\BilliardTable;
+use App\Models\QmNotification;
 use App\Models\Reservation;
 use App\Models\User;
-use App\Events\SessionExpiringEvent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class SessionExpiringNotificationTest extends TestCase
@@ -113,8 +115,89 @@ class SessionExpiringNotificationTest extends TestCase
 
         // Assert event was only dispatched once total
         Event::assertDispatched(SessionExpiringEvent::class, 1);
-        
+
         // Assert there is only one qm_notifications entry
-        $this->assertEquals(1, \App\Models\QmNotification::where('user_id', $customer->id)->where('type', 'session_expiring')->count());
+        $this->assertEquals(1, QmNotification::where('user_id', $customer->id)->where('type', 'session_expiring')->count());
+    }
+
+    public function test_command_dispatches_event_and_stores_notification_when_session_expires(): void
+    {
+        Event::fake();
+        $this->travelTo(now()->startOfSecond());
+
+        $customer = User::factory()->create(['role' => 'customer']);
+        $table = BilliardTable::factory()->create(['name' => 'Meja VIP 1']);
+        $package = BilliardPackage::factory()->create();
+
+        // Expired session (duration 60, actual_start_time is 65 minutes ago, so remaining_minutes <= 0)
+        $reservation = Reservation::factory()->create([
+            'user_id' => $customer->id,
+            'billiard_table_id' => $table->id,
+            'billiard_package_id' => $package->id,
+            'booking_status' => 'playing',
+            'actual_start_time' => now()->subMinutes(65),
+            'duration_minutes' => 60,
+        ]);
+
+        $this->artisan('billiard:check-expiring-sessions')
+            ->assertExitCode(0);
+
+        Event::assertDispatched(SessionExpiredEvent::class, function ($event) use ($reservation) {
+            return $event->reservation->id === $reservation->id;
+        });
+
+        $this->assertDatabaseHas('qm_notifications', [
+            'user_id' => $customer->id,
+            'target_role' => 'customer',
+            'title' => 'Waktu Bermain Habis!',
+            'type' => 'session_expired',
+        ]);
+
+        $this->assertDatabaseHas('qm_notifications', [
+            'target_role' => 'admin',
+            'title' => 'Sesi Bermain Habis!',
+            'type' => 'session_expired',
+        ]);
+
+        $this->assertDatabaseHas('qm_notifications', [
+            'target_role' => 'billiard_staff',
+            'title' => 'Sesi Bermain Habis!',
+            'type' => 'session_expired',
+        ]);
+    }
+
+    public function test_customer_can_trigger_session_expired_endpoint(): void
+    {
+        Event::fake();
+        $this->travelTo(now()->startOfSecond());
+
+        $customer = User::factory()->create(['role' => 'customer']);
+        $table = BilliardTable::factory()->create(['name' => 'Meja VIP 1']);
+        $package = BilliardPackage::factory()->create();
+
+        $reservation = Reservation::factory()->create([
+            'user_id' => $customer->id,
+            'billiard_table_id' => $table->id,
+            'billiard_package_id' => $package->id,
+            'booking_status' => 'playing',
+            'actual_start_time' => now()->subMinutes(65),
+            'duration_minutes' => 60,
+        ]);
+
+        $response = $this->actingAs($customer)
+            ->post(route('customer.reservations.expired', $reservation->id));
+
+        $response->assertStatus(200);
+
+        Event::assertDispatched(SessionExpiredEvent::class, function ($event) use ($reservation) {
+            return $event->reservation->id === $reservation->id;
+        });
+
+        $this->assertDatabaseHas('qm_notifications', [
+            'user_id' => $customer->id,
+            'target_role' => 'customer',
+            'title' => 'WAKTU BERMAIN SELESAI',
+            'type' => 'session_expired',
+        ]);
     }
 }
