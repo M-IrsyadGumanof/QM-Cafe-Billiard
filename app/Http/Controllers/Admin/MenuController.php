@@ -61,7 +61,12 @@ class MenuController extends Controller
             'image' => 'nullable|image|max:2048',
         ]);
 
-        if ($request->hasFile('image')) {
+        if ($request->boolean('delete_image')) {
+            if ($menu->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($menu->image);
+            }
+            $data['image'] = null;
+        } elseif ($request->hasFile('image')) {
             if ($menu->image) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($menu->image);
             }
