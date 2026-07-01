@@ -2,6 +2,7 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import StatusBadge from "@/Components/Shared/StatusBadge";
 import { money, date } from "@/Components/Shared/Format";
 import CountdownTimer from "@/Components/Shared/CountdownTimer";
+import { useState } from "react";
 
 export default function Dashboard({
     stats,
@@ -10,6 +11,25 @@ export default function Dashboard({
     recentPayments,
     activeSessions,
 }) {
+    const [expiredSessions, setExpiredSessions] = useState([]);
+
+    const handleSessionFinished = (id) => {
+        setExpiredSessions((prev) => [...prev, id]);
+    };
+
+    const visibleSessions = (activeSessions || []).filter((s) => {
+        const startTimestamp = new Date(s.actual_start_time).getTime();
+        const totalDurationMs = s.duration_minutes * 60 * 1000;
+        const endTimestamp = startTimestamp + totalDurationMs;
+        
+        // Filter out if already expired on load
+        if (Date.now() >= endTimestamp) {
+            return false;
+        }
+        // Filter out if expired live
+        return !expiredSessions.includes(s.id);
+    });
+
     const cardItems = [
         {
             key: "revenue",
@@ -234,7 +254,7 @@ export default function Dashboard({
             </div>
 
             {/* Active Billiard Sessions Section */}
-            {activeSessions && activeSessions.length > 0 && (
+            {visibleSessions.length > 0 && (
                 <div className="mt-10">
                     <div className="border-b border-[#222727] pb-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -244,12 +264,12 @@ export default function Dashboard({
                             </h3>
                         </div>
                         <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest font-mono bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-md">
-                            {activeSessions.length} MEJA AKTIF
+                            {visibleSessions.length} MEJA AKTIF
                         </span>
                     </div>
 
                     <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {activeSessions.map((session) => (
+                        {visibleSessions.map((session) => (
                             <div
                                 key={session.id}
                                 className="rounded-[15px] border border-[#222727] bg-gradient-to-br from-[#181d1d] to-[#111515] p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#ffcc00]/10"
@@ -273,6 +293,7 @@ export default function Dashboard({
                                     <CountdownTimer 
                                         startTime={session.actual_start_time} 
                                         durationMinutes={session.duration_minutes} 
+                                        onFinish={() => handleSessionFinished(session.id)}
                                     />
                                 </div>
                             </div>

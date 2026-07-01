@@ -2,8 +2,28 @@ import BilliardLayout from "@/Layouts/BilliardLayout";
 import StatusBadge from "@/Components/Shared/StatusBadge";
 import { Link } from "@inertiajs/react";
 import CountdownTimer from "@/Components/Shared/CountdownTimer";
+import { useState } from "react";
 
 export default function Dashboard({ stats, reservations, activeSessions }) {
+    const [expiredSessions, setExpiredSessions] = useState([]);
+
+    const handleSessionFinished = (id) => {
+        setExpiredSessions((prev) => [...prev, id]);
+    };
+
+    const visibleSessions = (activeSessions || []).filter((s) => {
+        const startTimestamp = new Date(s.actual_start_time).getTime();
+        const totalDurationMs = s.duration_minutes * 60 * 1000;
+        const endTimestamp = startTimestamp + totalDurationMs;
+        
+        // Filter out if already expired on load
+        if (Date.now() >= endTimestamp) {
+            return false;
+        }
+        // Filter out if expired live
+        return !expiredSessions.includes(s.id);
+    });
+
     const formatKey = (key) => {
         return key.replaceAll("_", " ").toUpperCase();
     };
@@ -59,7 +79,7 @@ export default function Dashboard({ stats, reservations, activeSessions }) {
             </div>
 
             {/* Active Billiard Sessions Section */}
-            {activeSessions && activeSessions.length > 0 && (
+            {visibleSessions.length > 0 && (
                 <div className="mt-10">
                     <div className="border-b border-[#222727] pb-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -69,12 +89,12 @@ export default function Dashboard({ stats, reservations, activeSessions }) {
                             </h3>
                         </div>
                         <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest font-mono bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-md">
-                            {activeSessions.length} MEJA AKTIF
+                            {visibleSessions.length} MEJA AKTIF
                         </span>
                     </div>
 
                     <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {activeSessions.map((session) => (
+                        {visibleSessions.map((session) => (
                             <Link
                                 key={session.id}
                                 href={`/billiard/reservations/${session.id}`}
@@ -99,6 +119,7 @@ export default function Dashboard({ stats, reservations, activeSessions }) {
                                     <CountdownTimer 
                                         startTime={session.actual_start_time} 
                                         durationMinutes={session.duration_minutes} 
+                                        onFinish={() => handleSessionFinished(session.id)}
                                     />
                                 </div>
                             </Link>

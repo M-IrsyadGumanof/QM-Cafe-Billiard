@@ -1,14 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function CountdownTimer({ startTime, durationMinutes, onFinish, showProgress = true }) {
     const [timeLeft, setTimeLeft] = useState(0); // in milliseconds
     const [progress, setProgress] = useState(100);
+    const hasFinishedRef = useRef(false);
+    const onFinishRef = useRef(onFinish);
+
+    // Keep onFinishRef updated with the latest callback
+    useEffect(() => {
+        onFinishRef.current = onFinish;
+    }, [onFinish]);
 
     const startTimestamp = new Date(startTime).getTime();
     const totalDurationMs = durationMinutes * 60 * 1000;
     const endTimestamp = startTimestamp + totalDurationMs;
 
     useEffect(() => {
+        hasFinishedRef.current = false;
+        let intervalId = null;
+
         const updateTimer = () => {
             const now = Date.now();
             const remaining = endTimestamp - now;
@@ -16,7 +26,13 @@ export default function CountdownTimer({ startTime, durationMinutes, onFinish, s
             if (remaining <= 0) {
                 setTimeLeft(0);
                 setProgress(0);
-                if (onFinish) onFinish();
+                if (!hasFinishedRef.current) {
+                    hasFinishedRef.current = true;
+                    if (onFinishRef.current) onFinishRef.current();
+                }
+                if (intervalId) {
+                    clearInterval(intervalId);
+                }
             } else {
                 setTimeLeft(remaining);
                 const percent = (remaining / totalDurationMs) * 100;
@@ -25,9 +41,18 @@ export default function CountdownTimer({ startTime, durationMinutes, onFinish, s
         };
 
         updateTimer();
-        const interval = setInterval(updateTimer, 1000);
 
-        return () => clearInterval(interval);
+        // Only start the interval if it is not already expired
+        const now = Date.now();
+        if (endTimestamp - now > 0) {
+            intervalId = setInterval(updateTimer, 1000);
+        }
+
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        };
     }, [startTime, durationMinutes]);
 
     const formatTime = (ms) => {
