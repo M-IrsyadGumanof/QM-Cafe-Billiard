@@ -30,6 +30,7 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'captcha' => ['required', 'string'],
         ];
     }
 
@@ -41,6 +42,19 @@ class LoginRequest extends FormRequest
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
+
+        $captchaInput = strtolower($this->input('captcha'));
+        $captchaSession = session('captcha');
+
+        if (!$captchaSession || $captchaInput !== $captchaSession) {
+            session()->forget('captcha');
+            
+            throw ValidationException::withMessages([
+                'captcha' => 'Kode captcha yang Anda masukkan salah.',
+            ]);
+        }
+
+        session()->forget('captcha');
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
