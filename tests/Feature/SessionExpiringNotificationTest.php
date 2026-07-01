@@ -2,14 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Events\SessionExpiredEvent;
+use App\Events\SessionExpiringEvent;
 use App\Models\BilliardPackage;
 use App\Models\BilliardTable;
+use App\Models\QmNotification;
 use App\Models\Reservation;
 use App\Models\User;
-use App\Events\SessionExpiringEvent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class SessionExpiringNotificationTest extends TestCase
@@ -113,9 +115,9 @@ class SessionExpiringNotificationTest extends TestCase
 
         // Assert event was only dispatched once total
         Event::assertDispatched(SessionExpiringEvent::class, 1);
-        
+
         // Assert there is only one qm_notifications entry
-        $this->assertEquals(1, \App\Models\QmNotification::where('user_id', $customer->id)->where('type', 'session_expiring')->count());
+        $this->assertEquals(1, QmNotification::where('user_id', $customer->id)->where('type', 'session_expiring')->count());
     }
 
     public function test_command_dispatches_event_and_stores_notification_when_session_expires(): void
@@ -140,7 +142,7 @@ class SessionExpiringNotificationTest extends TestCase
         $this->artisan('billiard:check-expiring-sessions')
             ->assertExitCode(0);
 
-        Event::assertDispatched(\App\Events\SessionExpiredEvent::class, function ($event) use ($reservation) {
+        Event::assertDispatched(SessionExpiredEvent::class, function ($event) use ($reservation) {
             return $event->reservation->id === $reservation->id;
         });
 
@@ -187,7 +189,7 @@ class SessionExpiringNotificationTest extends TestCase
 
         $response->assertStatus(200);
 
-        Event::assertDispatched(\App\Events\SessionExpiredEvent::class, function ($event) use ($reservation) {
+        Event::assertDispatched(SessionExpiredEvent::class, function ($event) use ($reservation) {
             return $event->reservation->id === $reservation->id;
         });
 

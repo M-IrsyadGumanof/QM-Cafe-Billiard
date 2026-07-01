@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\BilliardPackage;
+use App\Models\BilliardTable;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -93,7 +94,7 @@ class AdminBilliardPackageManagementTest extends TestCase
         ]);
 
         $user = User::factory()->create(['role' => 'customer']);
-        $table = \App\Models\BilliardTable::create([
+        $table = BilliardTable::create([
             'table_number' => '10',
             'name' => 'Table 10',
             'status' => 'available',
