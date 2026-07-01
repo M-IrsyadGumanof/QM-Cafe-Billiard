@@ -66,7 +66,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::post('/menu', [AdminMenuController::class, 'store'])->name('menu.store');
         Route::patch('/menu/{menu}', [AdminMenuController::class, 'update'])->name('menu.update');
         Route::delete('/menu/{menu}', [AdminMenuController::class, 'destroy'])->name('menu.destroy');
-        
+
         Route::get('/menu-categories', [AdminMenuCategoryController::class, 'index'])->name('menu-categories.index');
         Route::post('/menu-categories', [AdminMenuCategoryController::class, 'store'])->name('menu-categories.store');
         Route::patch('/menu-categories/{menuCategory}', [AdminMenuCategoryController::class, 'update'])->name('menu-categories.update');

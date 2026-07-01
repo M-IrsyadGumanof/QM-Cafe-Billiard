@@ -18,7 +18,7 @@ class GalleryController extends Controller
     public function index(): Response
     {
         return Inertia::render('Admin/Gallery', [
-            'galleries' => Gallery::latest()->paginate(12)
+            'galleries' => Gallery::latest()->paginate(12),
         ]);
     }
 
@@ -55,7 +55,12 @@ class GalleryController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        if ($request->hasFile('image')) {
+        if ($request->boolean('delete_image')) {
+            if ($gallery->image) {
+                Storage::disk('public')->delete($gallery->image);
+            }
+            $data['image'] = null;
+        } elseif ($request->hasFile('image')) {
             // Delete old image file if it exists
             if ($gallery->image) {
                 Storage::disk('public')->delete($gallery->image);
@@ -78,7 +83,7 @@ class GalleryController extends Controller
         if ($gallery->image) {
             Storage::disk('public')->delete($gallery->image);
         }
-        
+
         $gallery->delete();
 
         return back()->with('success', 'Foto galeri berhasil dihapus.');

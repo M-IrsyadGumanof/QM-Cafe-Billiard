@@ -16,6 +16,11 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            spacing: {
+                4.5: '1.125rem',
+                5.5: '1.375rem',
+                10.5: '2.625rem',
+            },
             colors: {
                 brand: {
                     DEFAULT: '#ffcc00',

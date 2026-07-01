@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\QmNotification;
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +14,15 @@ use Inertia\Response;
 
 class OrderController extends Controller
 {
-    public function cart(): Response { return Inertia::render('Customer/Cart'); }
-    public function checkout(): Response { return Inertia::render('Customer/Checkout'); }
+    public function cart(): Response
+    {
+        return Inertia::render('Customer/Cart');
+    }
+
+    public function checkout(): Response
+    {
+        return Inertia::render('Customer/Checkout');
+    }
 
     public function store(Request $request): RedirectResponse
     {
@@ -87,13 +93,15 @@ class OrderController extends Controller
     public function show(Order $order): Response
     {
         abort_unless($order->user_id === auth()->id(), 403);
-        return Inertia::render('Customer/OrderDetail', ['order' => $order->load(['items','payments'])]);
+
+        return Inertia::render('Customer/OrderDetail', ['order' => $order->load(['items', 'payments'])]);
     }
 
     private function generateOrderCode(): string
     {
         $prefix = 'ORD-'.now()->format('Ymd').'-';
-        $number = Order::where('order_code','like',$prefix.'%')->count() + 1;
-        return $prefix.str_pad((string)$number, 4, '0', STR_PAD_LEFT);
+        $number = Order::where('order_code', 'like', $prefix.'%')->count() + 1;
+
+        return $prefix.str_pad((string) $number, 4, '0', STR_PAD_LEFT);
     }
 }

@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Billiard;
 
 use App\Http\Controllers\Controller;
-use App\Models\{BilliardTable, Reservation};
+use App\Models\BilliardTable;
+use App\Models\Reservation;
 use Inertia\Inertia;
 use Inertia\Response;
 

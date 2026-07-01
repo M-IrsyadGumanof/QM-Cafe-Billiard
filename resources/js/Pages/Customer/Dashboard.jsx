@@ -2,6 +2,7 @@ import CustomerLayout from "@/Layouts/CustomerLayout";
 import StatusBadge from "@/Components/Shared/StatusBadge";
 import { money, date } from "@/Components/Shared/Format";
 import { Link } from "@inertiajs/react";
+import { useState } from "react";
 import CountdownTimer from "@/Components/Shared/CountdownTimer";
 
 export default function Dashboard({
@@ -11,6 +12,13 @@ export default function Dashboard({
     recentPayments,
     activeSession,
 }) {
+    const [isSessionExpired, setIsSessionExpired] = useState(() => {
+        if (!activeSession) return true;
+        const startTimestamp = new Date(activeSession.actual_start_time).getTime();
+        const totalDurationMs = activeSession.duration_minutes * 60 * 1000;
+        return Date.now() >= startTimestamp + totalDurationMs;
+    });
+
     const cardItems = [
         {
             key: "orders",
@@ -132,7 +140,7 @@ export default function Dashboard({
                 </div>
             </div>
 
-            {activeSession && (
+            {activeSession && !isSessionExpired && (
                 <div className="mt-6 rounded-[20px] border border-[#ffcc00]/20 bg-gradient-to-r from-[#181d1d] via-[#1c2222] to-[#111515] p-6 shadow-lg shadow-[#ffcc00]/5 relative overflow-hidden group animate-in fade-in slide-in-from-top-4 duration-300">
                     {/* Background glow decorator */}
                     <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#ffcc00]/5 rounded-full blur-2xl group-hover:bg-[#ffcc00]/8 transition-all duration-500" />
@@ -162,6 +170,7 @@ export default function Dashboard({
                                 startTime={activeSession.actual_start_time} 
                                 durationMinutes={activeSession.duration_minutes} 
                                 onFinish={() => {
+                                    setIsSessionExpired(true);
                                     axios.post(route('customer.reservations.expired', activeSession.id))
                                         .then(() => {
                                             window.dispatchEvent(new CustomEvent('local-session-expired', {

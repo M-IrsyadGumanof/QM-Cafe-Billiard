@@ -24,13 +24,13 @@ class AuthenticatedSessionController extends Controller
 
     public function generateCaptcha()
     {
-        $characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $characters = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         $code = '';
         for ($i = 0; $i < 6; $i++) {
             $code .= $characters[rand(0, strlen($characters) - 1)];
         }
 
-        session(['captcha' => strtolower($code)]);
+        session(['captcha' => $code]);
 
         $width = 150;
         $height = 42;
@@ -70,7 +70,7 @@ class AuthenticatedSessionController extends Controller
             $x += rand(18, 22);
         }
 
-        $svg .= "</svg>";
+        $svg .= '</svg>';
 
         return response($svg, 200)
             ->header('Content-Type', 'image/svg+xml')
@@ -87,7 +87,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerateToken();
 
             throw ValidationException::withMessages([
-                'email' => 'Akun Anda belum aktif atau sedang dinonaktifkan.',
+                'email' => 'Your account is not active or has been deactivated.',
             ]);
         }
 

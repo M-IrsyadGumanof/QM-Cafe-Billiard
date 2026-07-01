@@ -64,6 +64,22 @@ class AuthenticationTest extends TestCase
         $response->assertSessionHasErrors('captcha');
     }
 
+    public function test_users_can_not_authenticate_with_incorrect_case_captcha(): void
+    {
+        $user = User::factory()->create();
+
+        session(['captcha' => 'ABC123']);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+            'captcha' => 'abc123',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors('captcha');
+    }
+
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();

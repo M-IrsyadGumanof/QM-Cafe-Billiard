@@ -31,7 +31,7 @@ class SessionExpiringEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('customer.' . $this->reservation->user_id),
+            new PrivateChannel('customer.'.$this->reservation->user_id),
         ];
     }
 
@@ -43,12 +43,12 @@ class SessionExpiringEvent implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'reservation_id'    => $this->reservation->id,
-            'reservation_code'  => $this->reservation->reservation_code,
-            'table_name'        => $this->reservation->table?->name,
+            'reservation_id' => $this->reservation->id,
+            'reservation_code' => $this->reservation->reservation_code,
+            'table_name' => $this->reservation->table?->name,
             'remaining_minutes' => $this->remainingMinutes,
-            'end_time'          => $this->reservation->end_time,
-            'message'           => "Waktu bermain di {$this->reservation->table?->name} tersisa {$this->remainingMinutes} menit!",
+            'end_time' => $this->reservation->end_time,
+            'message' => "Waktu bermain di {$this->reservation->table?->name} tersisa {$this->remainingMinutes} menit!",
         ];
     }
 
