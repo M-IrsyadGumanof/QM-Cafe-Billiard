@@ -18,7 +18,7 @@ class GalleryController extends Controller
     public function index(): Response
     {
         return Inertia::render('Admin/Gallery', [
-            'galleries' => Gallery::latest()->paginate(12)
+            'galleries' => Gallery::latest()->paginate(12),
         ]);
     }
 
@@ -83,7 +83,7 @@ class GalleryController extends Controller
         if ($gallery->image) {
             Storage::disk('public')->delete($gallery->image);
         }
-        
+
         $gallery->delete();
 
         return back()->with('success', 'Foto galeri berhasil dihapus.');

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Order, Payment, Reservation};
+use App\Models\Order;
+use App\Models\Payment;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;

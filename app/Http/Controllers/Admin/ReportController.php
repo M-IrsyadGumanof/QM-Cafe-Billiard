@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Menu, Order, Payment, Reservation, User};
+use App\Models\Menu;
+use App\Models\Order;
+use App\Models\Payment;
+use App\Models\Reservation;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;

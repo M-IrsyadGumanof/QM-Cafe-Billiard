@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Order, OrderItem, Payment, Reservation, User};
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Payment;
+use App\Models\Reservation;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,9 +17,9 @@ class DashboardController extends Controller
     public function __invoke(): Response
     {
         $driver = DB::connection()->getDriverName();
-        $hourExpr = $driver === 'sqlite' 
-            ? "strftime('%H', start_time)" 
-            : "HOUR(start_time)";
+        $hourExpr = $driver === 'sqlite'
+            ? "strftime('%H', start_time)"
+            : 'HOUR(start_time)';
 
         $peakHours = Reservation::select(DB::raw("$hourExpr as hour"), DB::raw('COUNT(*) as count'))
             ->groupBy('hour')

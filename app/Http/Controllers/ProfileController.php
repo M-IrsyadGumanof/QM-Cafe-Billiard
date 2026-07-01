@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -73,11 +74,11 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if ($user->avatar) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+            Storage::disk('public')->delete($user->avatar);
         }
 
         $path = $request->file('avatar')->store('avatars', 'public');
-        
+
         $user->update([
             'avatar' => $path,
         ]);
@@ -93,7 +94,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if ($user->avatar) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+            Storage::disk('public')->delete($user->avatar);
             $user->update([
                 'avatar' => null,
             ]);
