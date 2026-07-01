@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Reservation;
-use App\Models\QmNotification;
-use App\Events\SessionExpiringEvent;
 use App\Events\SessionExpiredEvent;
+use App\Events\SessionExpiringEvent;
+use App\Models\QmNotification;
+use App\Models\Reservation;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
 class CheckExpiringSessionsCommand extends Command
@@ -37,15 +37,16 @@ class CheckExpiringSessionsCommand extends Command
         // 1. Sesi yang hampir habis (4-5 menit tersisa)
         $expiring = $reservations->filter(function ($reservation) {
             $remaining = $reservation->remaining_minutes;
+
             return $remaining !== null && $remaining <= 5 && $remaining >= 4;
         });
 
         foreach ($expiring as $reservation) {
             // Cek apakah notifikasi sudah dikirim (pakai cache untuk hindari duplikat)
             $cacheKey = "session_expiring_notified:{$reservation->id}";
-            if (!Cache::has($cacheKey)) {
+            if (! Cache::has($cacheKey)) {
                 event(new SessionExpiringEvent($reservation, $reservation->remaining_minutes));
-                
+
                 // Simpan juga ke database QmNotification
                 QmNotification::create([
                     'user_id' => $reservation->user_id,
@@ -63,12 +64,13 @@ class CheckExpiringSessionsCommand extends Command
         // 2. Sesi yang telah habis (0 menit atau kurang tersisa)
         $expired = $reservations->filter(function ($reservation) {
             $remaining = $reservation->remaining_minutes;
+
             return $remaining !== null && $remaining <= 0;
         });
 
         foreach ($expired as $reservation) {
             $expiredCacheKey = "session_expired_notified:{$reservation->id}";
-            if (!Cache::has($expiredCacheKey)) {
+            if (! Cache::has($expiredCacheKey)) {
                 // Notifikasi untuk customer
                 QmNotification::create([
                     'user_id' => $reservation->user_id,

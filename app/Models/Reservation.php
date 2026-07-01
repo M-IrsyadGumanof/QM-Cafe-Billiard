@@ -64,10 +64,10 @@ class Reservation extends Model
         static::updating(function ($reservation) {
             // Ketika status berubah menjadi playing
             if ($reservation->isDirty('booking_status') && $reservation->booking_status === 'playing') {
-                if (!$reservation->actual_start_time) {
+                if (! $reservation->actual_start_time) {
                     $reservation->actual_start_time = now();
                 }
-                
+
                 // Ubah status meja menjadi occupied
                 if ($reservation->billiard_table_id) {
                     BilliardTable::where('id', $reservation->billiard_table_id)
@@ -77,13 +77,13 @@ class Reservation extends Model
 
             // Ketika status berubah menjadi completed
             if ($reservation->isDirty('booking_status') && $reservation->booking_status === 'completed') {
-                if (!$reservation->actual_end_time) {
+                if (! $reservation->actual_end_time) {
                     $reservation->actual_end_time = now();
                 }
                 if ($reservation->actual_start_time) {
                     $reservation->actual_duration_minutes = (int) $reservation->actual_start_time->diffInMinutes($reservation->actual_end_time);
                 }
-                
+
                 // Ubah status meja menjadi available
                 if ($reservation->billiard_table_id) {
                     BilliardTable::where('id', $reservation->billiard_table_id)
@@ -123,8 +123,6 @@ class Reservation extends Model
      * Menghitung sisa menit bermain berdasarkan actual_start_time + duration_minutes.
      * Mengembalikan null jika actual_start_time atau duration_minutes belum diisi.
      * Mengembalikan 0 jika waktu sudah habis.
-     *
-     * @return int|null
      */
     public function getRemainingMinutesAttribute(): ?int
     {
@@ -138,4 +136,3 @@ class Reservation extends Model
         return (int) max(0, now()->diffInMinutes($endTime, false));
     }
 }
-
