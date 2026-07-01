@@ -46,9 +46,9 @@ class LoginRequest extends FormRequest
         $captchaInput = $this->input('captcha');
         $captchaSession = session('captcha');
 
-        if (!$captchaSession || $captchaInput !== $captchaSession) {
+        if (! $captchaSession || $captchaInput !== $captchaSession) {
             session()->forget('captcha');
-            
+
             throw ValidationException::withMessages([
                 'captcha' => 'The captcha code you entered is incorrect.',
             ]);

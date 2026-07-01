@@ -70,7 +70,7 @@ class AuthenticatedSessionController extends Controller
             $x += rand(18, 22);
         }
 
-        $svg .= "</svg>";
+        $svg .= '</svg>';
 
         return response($svg, 200)
             ->header('Content-Type', 'image/svg+xml')
