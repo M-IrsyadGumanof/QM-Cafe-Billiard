@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Order, Payment, Reservation, User};
+use App\Models\{Order, OrderItem, Payment, Reservation, User};
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,6 +22,11 @@ class DashboardController extends Controller
             ],
             'orders' => Order::with('user')->latest()->take(5)->get(),
             'reservations' => Reservation::with(['user', 'table'])->latest()->take(5)->get(),
+            'topMenuItems' => OrderItem::select('menu_name', DB::raw('SUM(quantity) as total_sold'))
+                ->groupBy('menu_name')
+                ->orderByDesc('total_sold')
+                ->take(5)
+                ->get(),
         ]);
     }
 }

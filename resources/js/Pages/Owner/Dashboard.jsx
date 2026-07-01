@@ -4,7 +4,7 @@ import StatusBadge from "@/Components/Shared/StatusBadge";
 import { Link, usePage } from "@inertiajs/react";
 import { useState } from "react";
 
-export default function Dashboard({ summary, orders, reservations }) {
+export default function Dashboard({ summary, orders, reservations, topMenuItems }) {
     const { auth } = usePage().props;
     const ownerName = auth.user?.name || "Owner";
 
@@ -313,6 +313,127 @@ export default function Dashboard({ summary, orders, reservations }) {
                     </div>
                 </div>
 
+            </div>
+
+            {/* Pie Chart - Menu Terlaris */}
+            <div className="mt-8">
+                <div className="rounded-2xl border border-[#2b3232]/50 bg-gradient-to-b from-[#181d1d] to-[#111515] p-6 shadow-xl relative">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#222727] pb-4 gap-3">
+                        <div>
+                            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                                Menu Terlaris
+                            </h3>
+                            <p className="text-[10px] text-[#9aa7b3] mt-1">
+                                Top 5 item makanan & minuman berdasarkan jumlah pesanan
+                            </p>
+                        </div>
+                    </div>
+
+                    {topMenuItems && topMenuItems.length > 0 ? (() => {
+                        const PIE_COLORS = ['#ffcc00', '#22d3ee', '#a78bfa', '#f472b6', '#34d399'];
+                        const totalSold = topMenuItems.reduce((sum, item) => sum + Number(item.total_sold), 0);
+                        const RADIUS = 70;
+                        const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+                        let cumulativeOffset = 0;
+
+                        return (
+                            <div className="mt-6 flex flex-col lg:flex-row items-center justify-center gap-10">
+                                {/* SVG Donut */}
+                                <div className="relative shrink-0">
+                                    <svg width="200" height="200" viewBox="0 0 200 200">
+                                        {/* Background circle */}
+                                        <circle cx="100" cy="100" r={RADIUS} fill="none" stroke="#222727" strokeWidth="28" />
+
+                                        {topMenuItems.map((item, index) => {
+                                            const fraction = Number(item.total_sold) / totalSold;
+                                            const dashLength = fraction * CIRCUMFERENCE;
+                                            const dashGap = CIRCUMFERENCE - dashLength;
+                                            const offset = -cumulativeOffset;
+                                            cumulativeOffset += dashLength;
+
+                                            return (
+                                                <circle
+                                                    key={index}
+                                                    cx="100"
+                                                    cy="100"
+                                                    r={RADIUS}
+                                                    fill="none"
+                                                    stroke={PIE_COLORS[index % PIE_COLORS.length]}
+                                                    strokeWidth="28"
+                                                    strokeDasharray={`${dashLength} ${dashGap}`}
+                                                    strokeDashoffset={offset}
+                                                    strokeLinecap="butt"
+                                                    transform="rotate(-90 100 100)"
+                                                    className="transition-all duration-700 ease-out hover:opacity-80"
+                                                    style={{ filter: `drop-shadow(0 0 4px ${PIE_COLORS[index % PIE_COLORS.length]}40)` }}
+                                                />
+                                            );
+                                        })}
+
+                                        {/* Center text */}
+                                        <text x="100" y="94" textAnchor="middle" className="fill-white text-xl font-black" style={{ fontSize: '22px' }}>
+                                            {totalSold}
+                                        </text>
+                                        <text x="100" y="114" textAnchor="middle" className="fill-[#9aa7b3]" style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                            Total Terjual
+                                        </text>
+                                    </svg>
+                                </div>
+
+                                {/* Legend */}
+                                <div className="flex-1 w-full space-y-3">
+                                    {topMenuItems.map((item, index) => {
+                                        const percentage = ((Number(item.total_sold) / totalSold) * 100).toFixed(1);
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="group flex items-center justify-between rounded-xl border border-[#222727]/50 bg-[#151919]/60 px-4 py-3 hover:border-[#3b4747] hover:bg-[#181d1d] transition-all duration-300"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <span
+                                                        className="h-3 w-3 rounded-full shrink-0 ring-2 ring-offset-1 ring-offset-[#111515]"
+                                                        style={{
+                                                            backgroundColor: PIE_COLORS[index % PIE_COLORS.length],
+                                                            ringColor: PIE_COLORS[index % PIE_COLORS.length],
+                                                        }}
+                                                    />
+                                                    <span className="text-xs font-bold text-white truncate max-w-[180px]">
+                                                        {item.menu_name}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-[10px] font-mono font-bold text-[#9aa7b3]">
+                                                        {item.total_sold} pcs
+                                                    </span>
+                                                    <span
+                                                        className="text-[10px] font-extrabold rounded-md px-2 py-0.5 border"
+                                                        style={{
+                                                            color: PIE_COLORS[index % PIE_COLORS.length],
+                                                            backgroundColor: `${PIE_COLORS[index % PIE_COLORS.length]}15`,
+                                                            borderColor: `${PIE_COLORS[index % PIE_COLORS.length]}30`,
+                                                        }}
+                                                    >
+                                                        {percentage}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })() : (
+                        <div className="mt-6 flex flex-col items-center justify-center py-12 text-center">
+                            <svg className="w-12 h-12 text-[#2b3232] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                            </svg>
+                            <p className="text-xs text-[#9aa7b3] italic">Belum ada data pesanan menu untuk ditampilkan</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Latest Activities Section with Tabs */}
