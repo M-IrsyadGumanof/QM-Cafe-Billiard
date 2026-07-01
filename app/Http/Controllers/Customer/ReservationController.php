@@ -123,6 +123,50 @@ class ReservationController extends Controller
         ]);
     }
 
+    public function handleExpiredSession(Reservation $reservation): JsonResponse
+    {
+        abort_unless($reservation->user_id === auth()->id(), 403);
+
+        if ($reservation->booking_status === 'playing') {
+            $cacheKey = "session_expired_notified:{$reservation->id}";
+            if (!cache()->has($cacheKey)) {
+                cache()->put($cacheKey, true, now()->addDay());
+
+                // Customer notification
+                QmNotification::create([
+                    'user_id' => $reservation->user_id,
+                    'target_role' => 'customer',
+                    'title' => 'WAKTU BERMAIN SELESAI',
+                    'message' => "Waktu bermain Anda di {$reservation->table?->name} telah habis!",
+                    'type' => 'session_expired',
+                    'is_read' => false
+                ]);
+
+                // Admin notification
+                QmNotification::create([
+                    'target_role' => 'admin',
+                    'title' => 'Sesi Bermain Habis',
+                    'message' => "Sesi bermain customer {$reservation->user?->name} di {$reservation->table?->name} telah habis.",
+                    'type' => 'session_expired',
+                    'is_read' => false
+                ]);
+
+                // Billiard Staff notification
+                QmNotification::create([
+                    'target_role' => 'billiard_staff',
+                    'title' => 'Sesi Bermain Habis',
+                    'message' => "Sesi bermain customer {$reservation->user?->name} di {$reservation->table?->name} telah habis.",
+                    'type' => 'session_expired',
+                    'is_read' => false
+                ]);
+
+                event(new \App\Events\SessionExpiredEvent($reservation));
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
     private function generateReservationCode(): string
     {
         $prefix = 'RSV-'.now()->format('Ymd').'-';

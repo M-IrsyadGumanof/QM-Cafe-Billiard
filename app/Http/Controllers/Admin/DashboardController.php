@@ -25,6 +25,7 @@ class DashboardController extends Controller
             'recentOrders' => Order::with('user')->latest()->take(5)->get(),
             'recentReservations' => Reservation::with(['user', 'table', 'package'])->latest()->take(5)->get(),
             'recentPayments' => Payment::with('user')->latest()->take(5)->get(),
+            'activeSessions' => Reservation::with(['user', 'table', 'package'])->activePlaying()->get(),
         ]);
     }
 }

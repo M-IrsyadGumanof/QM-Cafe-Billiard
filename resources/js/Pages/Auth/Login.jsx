@@ -9,9 +9,13 @@ import { useState } from "react";
 
 export default function Login({ status, canResetPassword }) {
     const [showPassword, setShowPassword] = useState(false);
+    const [captchaKey, setCaptchaKey] = useState(0);
+    const refreshCaptcha = () => setCaptchaKey((prev) => prev + 1);
+
     const { data, setData, post, processing, errors, reset } = useForm({
         email: "",
         password: "",
+        captcha: "",
         remember: false,
     });
 
@@ -19,7 +23,13 @@ export default function Login({ status, canResetPassword }) {
         e.preventDefault();
 
         post(route("login"), {
-            onFinish: () => reset("password"),
+            onFinish: () => {
+                reset("password");
+                refreshCaptcha();
+            },
+            onError: () => {
+                refreshCaptcha();
+            },
         });
     };
 
@@ -108,6 +118,48 @@ export default function Login({ status, canResetPassword }) {
                     </div>
 
                     <InputError message={errors.password} className="mt-2" />
+                </div>
+
+                <div className="mt-4">
+                    <InputLabel htmlFor="captcha" value="Verifikasi Captcha" />
+
+                    <div className="flex items-center gap-3 mt-1">
+                        <div className="relative overflow-hidden rounded-[7px] border border-[#2b3232] h-[42px] w-[140px] shrink-0 bg-[#151919] flex items-center justify-center">
+                            <img
+                                src={`/captcha?t=${captchaKey}`}
+                                alt="Captcha"
+                                className="h-full w-full object-cover"
+                            />
+                        </div>
+                        
+                        <button
+                            type="button"
+                            onClick={refreshCaptcha}
+                            className="flex items-center justify-center h-[42px] w-[42px] shrink-0 rounded-[7px] border border-[#2b3232] bg-[#151919] text-[#ffcc00] hover:bg-[#222727] hover:text-[#ffe17a] transition-all duration-200"
+                            title="Segarkan Captcha"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3" />
+                            </svg>
+                        </button>
+
+                        <TextInput
+                            id="captcha"
+                            type="text"
+                            name="captcha"
+                            value={data.captcha}
+                            className="block w-full"
+                            placeholder="6 karakter..."
+                            autoComplete="off"
+                            maxLength={6}
+                            required
+                            onChange={(e) =>
+                                setData("captcha", e.target.value)
+                            }
+                        />
+                    </div>
+
+                    <InputError message={errors.captcha} className="mt-2" />
                 </div>
 
                 <div className="mt-4 block">

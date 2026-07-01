@@ -1,5 +1,6 @@
 import BilliardLayout from "@/Layouts/BilliardLayout";
 import StatusBadge from "@/Components/Shared/StatusBadge";
+import CountdownTimer from "@/Components/Shared/CountdownTimer";
 
 export default function PlayingSessions({ reservations }) {
     const rows = reservations || [];
@@ -58,6 +59,14 @@ export default function PlayingSessions({ reservations }) {
                                             {r.start_time?.substring(0, 5)} - {r.end_time?.substring(0, 5)}
                                         </span>
                                     </div>
+                                    {r.booking_status === 'playing' && r.actual_start_time && (
+                                        <div className="mt-3 pt-3 border-t border-[#222727] w-full">
+                                            <CountdownTimer 
+                                                startTime={r.actual_start_time} 
+                                                durationMinutes={r.duration_minutes} 
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

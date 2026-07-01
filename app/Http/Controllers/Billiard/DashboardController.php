@@ -18,6 +18,7 @@ class DashboardController extends Controller
                 'playing' => Reservation::where('booking_status', 'playing')->count(),
             ],
             'reservations' => Reservation::with(['user', 'table', 'package'])->latest()->take(10)->get(),
+            'activeSessions' => Reservation::with(['user', 'table', 'package'])->activePlaying()->get(),
         ]);
     }
 }

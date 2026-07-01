@@ -1,8 +1,9 @@
 import BilliardLayout from "@/Layouts/BilliardLayout";
 import StatusBadge from "@/Components/Shared/StatusBadge";
 import { Link } from "@inertiajs/react";
+import CountdownTimer from "@/Components/Shared/CountdownTimer";
 
-export default function Dashboard({ stats, reservations }) {
+export default function Dashboard({ stats, reservations, activeSessions }) {
     const formatKey = (key) => {
         return key.replaceAll("_", " ").toUpperCase();
     };
@@ -56,6 +57,55 @@ export default function Dashboard({ stats, reservations }) {
                     </div>
                 ))}
             </div>
+
+            {/* Active Billiard Sessions Section */}
+            {activeSessions && activeSessions.length > 0 && (
+                <div className="mt-10">
+                    <div className="border-b border-[#222727] pb-3 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <h3 className="text-base font-extrabold text-white tracking-wide">
+                                Sesi Bermain Aktif (Billiard)
+                            </h3>
+                        </div>
+                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest font-mono bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-md">
+                            {activeSessions.length} MEJA AKTIF
+                        </span>
+                    </div>
+
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {activeSessions.map((session) => (
+                            <Link
+                                key={session.id}
+                                href={`/billiard/reservations/${session.id}`}
+                                className="rounded-[15px] border border-[#222727] bg-[#111515]/60 p-5 shadow-sm transition-all duration-300 hover:bg-[#181d1d] hover:border-[#ffcc00]/25 block hover:-translate-y-1 hover:shadow-lg"
+                            >
+                                <div className="flex justify-between items-start border-b border-[#222727] pb-3 mb-3">
+                                    <div>
+                                        <h4 className="font-bold text-white text-sm">
+                                            {session.table?.name || "Meja Billiard"}
+                                        </h4>
+                                        <p className="text-[10px] text-[#ffcc00] font-mono mt-0.5 font-bold">
+                                            {session.reservation_code}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[10px] text-[#9aa7b3] uppercase font-bold">Pemain</p>
+                                        <p className="text-xs text-white font-bold">{session.user?.name || "Customer"}</p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-2 bg-[#0f1212]/40 p-3.5 rounded-xl border border-[#222727]/60">
+                                    <CountdownTimer 
+                                        startTime={session.actual_start_time} 
+                                        durationMinutes={session.duration_minutes} 
+                                    />
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Recent Reservations list */}
             <div className="mt-10 border-b border-[#222727] pb-3 flex items-center justify-between">
