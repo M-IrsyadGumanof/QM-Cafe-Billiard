@@ -45,13 +45,13 @@ Panel kontrol utama untuk memelihara data master dan mengonfirmasi transaksi keu
 - **[x] Manajemen Pengguna (Users):** Fitur CRUD (Create, Read, Update, Delete) pengguna, menentukan level hak akses (Admin, Kitchen, Billiard, Owner, Customer), serta mereset sandi staf.
 - **[x] Manajemen Menu & Kategori:**
   - **[x] CRUD Kategori:** Mengelompokkan makanan dan minuman.
-  - **[x] CRUD Menu:** Mengelola informasi item menu, harga, status ketersediaan, serta mengunggah foto menu baru (dilengkapi penghapusan otomatis gambar lama di storage).
+  - **[x] CRUD Menu:** Mengelola informasi item menu, harga, status ketersediaan, serta kustomisasi gambar (crop, zoom, drag) dan mengunggah foto menu baru (dilengkapi penghapusan otomatis gambar lama di storage).
 - **[x] CRUD Paket Billiard:** Mengelola data paket billiard beserta deskripsi fasilitas, harga per jam, jenis meja, dan pengujian unit test.
 - **[x] CRUD Meja Billiard (Billiard Tables):** Mengelola nomor meja billiard dan tipe fasilitas.
 - **[x] Verifikasi Pembayaran (Payment Verification):**
   - **[x] Peninjauan Bukti Transfer:** Melihat lampiran gambar bukti transfer yang dikirim customer.
   - **[x] Aksi Approval/Rejection:** Mengubah status pembayaran menjadi `Paid` (Lunas) atau `Rejected` (Ditolak) secara manual.
-- **[x] Manajemen Konten:** Mengelola data FAQ, Testimoni, dan Galeri untuk website publik.
+- **[x] Manajemen Konten:** Mengelola data FAQ, Testimoni, dan Galeri untuk website publik (dilengkapi pemotongan gambar kustom pada foto galeri baru).
 - **[x] Laporan Transaksi:** Filter data transaksi kafe dan reservasi billiard berdasarkan rentang tanggal.
 
 ---
