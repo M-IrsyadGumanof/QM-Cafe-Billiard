@@ -28,28 +28,35 @@ class PageController extends Controller
         ]);
     }
 
-    public function about(): Response { return Inertia::render('Public/About'); }
-    public function contact(): Response { return Inertia::render('Public/Contact'); }
+    public function about(): Response
+    {
+        return Inertia::render('Public/About');
+    }
+
+    public function contact(): Response
+    {
+        return Inertia::render('Public/Contact');
+    }
 
     public function packages(): Response
     {
         return Inertia::render('Public/BilliardPackages', [
-            'packages' => BilliardPackage::where('status','active')->orderBy('type')->get(),
+            'packages' => BilliardPackage::where('status', 'active')->orderBy('type')->get(),
         ]);
     }
 
     public function gallery(): Response
     {
-        return Inertia::render('Public/Gallery', ['galleries' => Gallery::where('status','active')->latest()->get()]);
+        return Inertia::render('Public/Gallery', ['galleries' => Gallery::where('status', 'active')->latest()->get()]);
     }
 
     public function faq(): Response
     {
-        return Inertia::render('Public/Faq', ['faqs' => Faq::where('status','active')->orderBy('category')->get()]);
+        return Inertia::render('Public/Faq', ['faqs' => Faq::where('status', 'active')->orderBy('category')->get()]);
     }
 
     public function testimonials(): Response
     {
-        return Inertia::render('Public/Testimonials', ['testimonials' => Testimonial::with('user')->where('status','active')->latest()->get()]);
+        return Inertia::render('Public/Testimonials', ['testimonials' => Testimonial::with('user')->where('status', 'active')->latest()->get()]);
     }
 }

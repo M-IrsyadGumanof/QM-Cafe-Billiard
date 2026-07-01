@@ -21,10 +21,10 @@ class MenuController extends Controller
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%")
-                      ->orWhereHas('category', function ($categoryQuery) use ($search) {
-                          $categoryQuery->where('name', 'like', "%{$search}%");
-                      });
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhereHas('category', function ($categoryQuery) use ($search) {
+                            $categoryQuery->where('name', 'like', "%{$search}%");
+                        });
                 });
             })
             ->when($category !== '', function ($query) use ($category) {
@@ -49,6 +49,7 @@ class MenuController extends Controller
     public function show(Menu $menu): Response
     {
         abort_unless($menu->status === 'available', 404);
+
         return Inertia::render('Public/MenuDetail', ['menu' => $menu->load('category')]);
     }
 }

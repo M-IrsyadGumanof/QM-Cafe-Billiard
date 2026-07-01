@@ -17,7 +17,7 @@ class PaymentController extends Controller
     public function index(): Response
     {
         return Inertia::render('Customer/Payments', [
-            'payments' => auth()->user()->payments()->with(['order','reservation'])->latest()->paginate(10),
+            'payments' => auth()->user()->payments()->with(['order', 'reservation'])->latest()->paginate(10),
         ]);
     }
 
@@ -27,7 +27,8 @@ class PaymentController extends Controller
         $id = (int) $request->query('id');
         $target = $type === 'reservation' ? Reservation::findOrFail($id) : Order::findOrFail($id);
         abort_unless($target->user_id === auth()->id(), 403);
-        return Inertia::render('Customer/PaymentUpload', ['targetType'=>$type, 'target'=>$target]);
+
+        return Inertia::render('Customer/PaymentUpload', ['targetType' => $type, 'target' => $target]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -60,16 +61,17 @@ class PaymentController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        $target->update(['payment_status'=>'pending']);
-        QmNotification::create(['target_role'=>'admin','title'=>'Payment Proof Uploaded','message'=>'Bukti pembayaran '.$payment->payment_code.' menunggu verifikasi.','type'=>'payment']);
+        $target->update(['payment_status' => 'pending']);
+        QmNotification::create(['target_role' => 'admin', 'title' => 'Payment Proof Uploaded', 'message' => 'Bukti pembayaran '.$payment->payment_code.' menunggu verifikasi.', 'type' => 'payment']);
 
-        return redirect()->route('customer.payments.index')->with('success','Bukti pembayaran berhasil diupload.');
+        return redirect()->route('customer.payments.index')->with('success', 'Bukti pembayaran berhasil diupload.');
     }
 
     private function generatePaymentCode(): string
     {
         $prefix = 'PAY-'.now()->format('Ymd').'-';
-        $number = Payment::where('payment_code','like',$prefix.'%')->count() + 1;
-        return $prefix.str_pad((string)$number, 4, '0', STR_PAD_LEFT);
+        $number = Payment::where('payment_code', 'like', $prefix.'%')->count() + 1;
+
+        return $prefix.str_pad((string) $number, 4, '0', STR_PAD_LEFT);
     }
 }
