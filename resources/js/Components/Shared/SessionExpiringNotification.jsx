@@ -92,9 +92,20 @@ export default function SessionExpiringNotification() {
             playWarningSound();
         });
 
+        const handleLocalExpired = (e) => {
+            console.log('Received local-session-expired event:', e.detail);
+            setNotification({ ...e.detail, type: 'expired' });
+            setIsVisible(true);
+            setProgress(100);
+            playWarningSound();
+        };
+
+        window.addEventListener('local-session-expired', handleLocalExpired);
+
         return () => {
             console.log(`Leaving private channel: customer.${auth.user.id}`);
             window.Echo.leave(`customer.${auth.user.id}`);
+            window.removeEventListener('local-session-expired', handleLocalExpired);
             if (progressInterval.current) {
                 clearInterval(progressInterval.current);
             }

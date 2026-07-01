@@ -161,6 +161,20 @@ export default function Dashboard({
                             <CountdownTimer 
                                 startTime={activeSession.actual_start_time} 
                                 durationMinutes={activeSession.duration_minutes} 
+                                onFinish={() => {
+                                    axios.post(route('customer.reservations.expired', activeSession.id))
+                                        .then(() => {
+                                            window.dispatchEvent(new CustomEvent('local-session-expired', {
+                                                detail: {
+                                                    reservation_id: activeSession.id,
+                                                    reservation_code: activeSession.reservation_code,
+                                                    table_name: activeSession.table?.name,
+                                                    message: `Waktu bermain Anda di ${activeSession.table?.name} telah habis!`
+                                                }
+                                            }));
+                                        })
+                                        .catch((err) => console.error(err));
+                                }}
                             />
                         </div>
                     </div>

@@ -64,3 +64,9 @@ h4 {
 .modern-btn-primary {
     @apply rounded-[10px] bg-brand px-5 py-2.5 text-sm font-extrabold text-surface-elevated hover:bg-brand-hover active:scale-95 transition-all duration-200 shadow-lg shadow-brand/10;
 }
+
+/* Hide default browser password reveal/clear eye icons (Edge, Chrome, etc.) */
+input::-ms-reveal,
+input::-ms-clear {
+    display: none !important;
+}

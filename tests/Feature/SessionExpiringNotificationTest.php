@@ -163,4 +163,39 @@ class SessionExpiringNotificationTest extends TestCase
             'type' => 'session_expired',
         ]);
     }
+
+    public function test_customer_can_trigger_session_expired_endpoint(): void
+    {
+        Event::fake();
+        $this->travelTo(now()->startOfSecond());
+
+        $customer = User::factory()->create(['role' => 'customer']);
+        $table = BilliardTable::factory()->create(['name' => 'Meja VIP 1']);
+        $package = BilliardPackage::factory()->create();
+
+        $reservation = Reservation::factory()->create([
+            'user_id' => $customer->id,
+            'billiard_table_id' => $table->id,
+            'billiard_package_id' => $package->id,
+            'booking_status' => 'playing',
+            'actual_start_time' => now()->subMinutes(65),
+            'duration_minutes' => 60,
+        ]);
+
+        $response = $this->actingAs($customer)
+            ->post(route('customer.reservations.expired', $reservation->id));
+
+        $response->assertStatus(200);
+
+        Event::assertDispatched(\App\Events\SessionExpiredEvent::class, function ($event) use ($reservation) {
+            return $event->reservation->id === $reservation->id;
+        });
+
+        $this->assertDatabaseHas('qm_notifications', [
+            'user_id' => $customer->id,
+            'target_role' => 'customer',
+            'title' => 'WAKTU BERMAIN SELESAI',
+            'type' => 'session_expired',
+        ]);
+    }
 }

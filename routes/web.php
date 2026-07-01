@@ -140,6 +140,7 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::get('/notifications', [CustomerNotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/{notification}/read', [CustomerNotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::get('/active-session', [CustomerReservationController::class, 'activeSession'])->name('active-session');
+    Route::post('/reservations/{reservation}/expired', [CustomerReservationController::class, 'handleExpiredSession'])->name('reservations.expired');
 });
 
 Route::middleware(['auth', 'verified', 'role:kitchen_staff'])->prefix('kitchen')->name('kitchen.')->group(function () {
