@@ -396,8 +396,8 @@ export default function CustomerLayout({ children }) {
 
                 {/* Content */}
                 <section className="p-6 flex-1 flex flex-col relative z-10">
-                    <Flash />
                     <SessionExpiringNotification />
+                    <Flash />
                     {children}
                 </section>
             </main>

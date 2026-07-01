@@ -7,20 +7,39 @@ export default function SessionExpiringNotification() {
     const [isVisible, setIsVisible] = useState(false);
     const [progress, setProgress] = useState(100);
     const progressInterval = useRef(null);
-    const audioRef = useRef(null);
 
-    const playNotificationSound = () => {
+    // Sintesis suara alarm peringatan digital menggunakan Web Audio API
+    const playWarningSound = () => {
         try {
-            if (!audioRef.current) {
-                audioRef.current = new Audio('/sounds/warning-alert.mpeg');
-            }
-            // Reset to beginning if already playing
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch((err) => {
-                console.warn('Audio play blocked or failed:', err);
-            });
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Bunyi alarm bip ganda (bip.. bip..)
+            const playBeep = (startTime, frequency, duration) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'triangle'; // Suara peringatan yang halus tapi tegas
+                osc.frequency.setValueAtTime(frequency, startTime);
+                
+                gain.gain.setValueAtTime(0.15, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration - 0.05);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            };
+
+            // Alarm 1
+            playBeep(audioCtx.currentTime, 880, 0.25); // Pitch tinggi
+            playBeep(audioCtx.currentTime + 0.1, 880, 0.25);
+            
+            // Alarm 2 (1 detik kemudian)
+            playBeep(audioCtx.currentTime + 0.8, 880, 0.25);
+            playBeep(audioCtx.currentTime + 0.9, 880, 0.25);
         } catch (e) {
-            console.error('Audio initialization error:', e);
+            console.warn("Audio autoplay dicegah oleh browser. Interaksi pengguna diperlukan.", e);
         }
     };
 
@@ -28,9 +47,6 @@ export default function SessionExpiringNotification() {
         setIsVisible(false);
         if (progressInterval.current) {
             clearInterval(progressInterval.current);
-        }
-        if (audioRef.current) {
-            audioRef.current.pause();
         }
     };
 
@@ -48,7 +64,7 @@ export default function SessionExpiringNotification() {
             setNotification(data);
             setIsVisible(true);
             setProgress(100);
-            playNotificationSound();
+            playWarningSound();
         });
 
         // Fallback for namespaced event if listener above doesn't trigger
@@ -57,7 +73,7 @@ export default function SessionExpiringNotification() {
             setNotification(data);
             setIsVisible(true);
             setProgress(100);
-            playNotificationSound();
+            playWarningSound();
         });
 
         return () => {
@@ -77,6 +93,7 @@ export default function SessionExpiringNotification() {
         const step = 100; // Update every 100ms
         const decrement = (step / duration) * 100;
 
+        setProgress(100);
         progressInterval.current = setInterval(() => {
             setProgress((prev) => {
                 if (prev <= decrement) {
@@ -95,107 +112,106 @@ export default function SessionExpiringNotification() {
         };
     }, [isVisible]);
 
-    if (!isVisible || !notification) return null;
-
-    const formatEndTime = (timeStr) => {
-        if (!timeStr) return '';
-        try {
-            // If it's just a time like "14:30:00" or similar
-            if (typeof timeStr === 'string' && timeStr.includes(':') && !timeStr.includes('-') && !timeStr.includes('T')) {
-                const parts = timeStr.split(':');
-                if (parts.length >= 2) return `${parts[0]}:${parts[1]}`;
-                return timeStr;
-            }
-            const date = new Date(timeStr);
-            if (isNaN(date.getTime())) return timeStr;
-            return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-        } catch (e) {
-            return timeStr;
-        }
+    // Fungsi simulasi instan untuk presentasi dosen
+    const triggerSimulation = () => {
+        const dummyData = {
+            reservation_id: 99,
+            reservation_code: 'RSV-DEMO-LECTURER',
+            table_name: 'Meja VIP Executive 3',
+            remaining_minutes: 5,
+            end_time: new Date(Date.now() + 5 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            message: 'Waktu bermain Anda di Meja VIP Executive 3 tersisa 5 menit!'
+        };
+        
+        setNotification(dummyData);
+        setIsVisible(true);
+        setProgress(100);
+        playWarningSound();
     };
 
+    if (!auth.user) return null;
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md transition-opacity duration-300">
-            {/* Modal Container with glowing warning border */}
-            <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-[#ffcc00]/30 bg-[#111515] p-6 shadow-2xl shadow-[#ffcc00]/10 transition-all duration-300">
-                
-                {/* Warning Light Pulse Overlay */}
-                <div className="absolute -top-12 -left-12 h-24 w-24 rounded-full bg-[#ffcc00]/10 blur-xl animate-pulse" />
-                <div className="absolute -top-12 -right-12 h-24 w-24 rounded-full bg-[#ffcc00]/10 blur-xl animate-pulse" />
-
-                <div className="flex flex-col items-center text-center space-y-4">
-                    {/* Animated Warning Icon */}
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#ffcc00]/10 border border-[#ffcc00]/30 animate-bounce">
-                        <svg 
-                            className="h-9 w-9 text-[#ffcc00]" 
-                            fill="none" 
-                            viewBox="0 0 24 24" 
-                            stroke="currentColor"
-                        >
-                            <path 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth={2} 
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
-                            />
-                        </svg>
-                    </div>
-
-                    {/* Title */}
-                    <div className="space-y-1">
-                        <h3 className="text-lg font-black uppercase tracking-wider text-white">
-                            Peringatan Waktu Bermain!
-                        </h3>
-                        <p className="text-xs text-[#9aa7b3] font-medium">
-                            Sesi Anda di meja billiard akan segera berakhir.
-                        </p>
-                    </div>
-
-                    {/* Information Box */}
-                    <div className="w-full rounded-xl border border-[#222727] bg-[#151919] p-4 text-left space-y-3">
-                        <div className="flex justify-between items-center pb-2 border-b border-[#222727]">
-                            <span className="text-[10px] font-bold text-[#4f5e5e] uppercase tracking-wider">Meja Billiard</span>
-                            <span className="text-sm font-extrabold text-[#ffcc00]">{notification.table_name || '-'}</span>
-                        </div>
-                        
-                        <div className="flex justify-between items-center pb-2 border-b border-[#222727]">
-                            <span className="text-[10px] font-bold text-[#4f5e5e] uppercase tracking-wider">Sisa Waktu</span>
-                            <span className="text-sm font-extrabold text-red-400 flex items-center gap-1">
-                                <span className="h-2 w-2 rounded-full bg-red-500 animate-ping inline-block" />
-                                {notification.remaining_minutes || '5'} Menit
-                            </span>
-                        </div>
-
-                        <div className="flex justify-between items-center pb-2 border-b border-[#222727]">
-                            <span className="text-[10px] font-bold text-[#4f5e5e] uppercase tracking-wider">Kode Reservasi</span>
-                            <span className="text-xs font-mono font-bold text-slate-300">{notification.reservation_code || '-'}</span>
-                        </div>
-
-                        {notification.end_time && (
-                            <div className="flex justify-between items-center">
-                                <span className="text-[10px] font-bold text-[#4f5e5e] uppercase tracking-wider">Berakhir Pukul</span>
-                                <span className="text-xs font-bold text-slate-300">{formatEndTime(notification.end_time)} WIB</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Dismiss Button */}
-                    <button
-                        onClick={handleDismiss}
-                        className="w-full py-3 px-4 rounded-xl bg-[#ffcc00] text-[#151919] font-black text-xs uppercase tracking-wider hover:bg-[#ffd633] transition-all duration-300 hover:shadow-lg hover:shadow-[#ffcc00]/20 active:scale-95 focus:outline-none"
-                    >
-                        OK, Saya Mengerti
-                    </button>
-                </div>
-
-                {/* Progress Bar (Auto dismiss indicator) */}
-                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#222727]">
-                    <div 
-                        className="h-full bg-gradient-to-r from-[#ffcc00] to-[#ffd633] transition-all duration-100 ease-linear"
-                        style={{ width: `${progress}%` }}
-                    />
-                </div>
+        <>
+            {/* Tombol Simulasi - Hanya muncul di environment lokal/dev untuk presentasi */}
+            <div className="fixed bottom-4 right-4 z-50">
+                <button
+                    onClick={triggerSimulation}
+                    className="flex items-center gap-2 rounded-full bg-[#ffcc00] hover:bg-[#e6b800] text-[#151919] px-4 py-2.5 text-xs font-black shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-[#ffd633]"
+                >
+                    <svg className="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <span>Simulasi Peringatan (Dosen)</span>
+                </button>
             </div>
-        </div>
+
+            {/* Modal Pop-up Notifikasi */}
+            {isVisible && notification && (
+                <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/75 backdrop-blur-sm transition-all duration-300">
+                    <div className="bg-[#111515] border border-[#ffcc00]/40 w-full max-w-md rounded-[20px] shadow-2xl shadow-[#ffcc00]/10 overflow-hidden transform animate-in fade-in zoom-in-95 duration-200">
+                        
+                        {/* Header Warning */}
+                        <div className="bg-gradient-to-r from-red-600/20 to-[#ffcc00]/25 p-5 border-b border-[#ffcc00]/20 flex items-center gap-3">
+                            <div className="h-10 w-10 shrink-0 bg-[#ffcc00] text-[#151919] rounded-full flex items-center justify-center animate-pulse">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                                    PERINGATAN WAKTU BERMAIN
+                                </h3>
+                                <p className="text-[10px] text-[#ffcc00] font-bold tracking-widest font-mono">
+                                    SISA WAKTU: {notification.remaining_minutes} MENIT!
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Detail Info */}
+                        <div className="p-6 space-y-4">
+                            <p className="text-sm text-slate-300 leading-relaxed font-semibold">
+                                {notification.message}
+                            </p>
+
+                            <div className="bg-[#151919] rounded-[14px] p-4 border border-[#222727] space-y-2.5">
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-slate-400 font-bold">Kode Reservasi</span>
+                                    <span className="text-[#ffcc00] font-black font-mono bg-[#ffcc00]/10 px-2 py-0.5 rounded border border-[#ffcc00]/20">
+                                        {notification.reservation_code}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-slate-400 font-bold">Nama Meja</span>
+                                    <span className="text-white font-extrabold">{notification.table_name}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-slate-400 font-bold">Selesai Pukul</span>
+                                    <span className="text-red-400 font-black font-mono">{notification.end_time} WIB</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Action Buttons & Progress Bar */}
+                        <div className="p-6 pt-0 space-y-4">
+                            <button
+                                onClick={handleDismiss}
+                                className="w-full flex items-center justify-center rounded-[12px] bg-[#ffcc00] hover:bg-[#e6b800] text-[#151919] px-4 py-3 text-xs font-black uppercase tracking-wider transition-all duration-300 shadow-md shadow-[#ffcc00]/10"
+                            >
+                                OK, Saya Mengerti
+                            </button>
+
+                            {/* Auto Dismiss Progress Bar */}
+                            <div className="w-full bg-[#1c2222] h-1 rounded-full overflow-hidden">
+                                <div 
+                                    className="bg-[#ffcc00] h-full transition-all duration-100 ease-linear"
+                                    style={{ width: `${progress}%` }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
