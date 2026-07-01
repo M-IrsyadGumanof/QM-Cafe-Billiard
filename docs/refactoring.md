@@ -78,3 +78,29 @@ Penyelarasan pengalaman pengguna (UX) agar tetap konsisten dalam satu tema visua
 ### Dampak yang Dihasilkan
 - Tampilan kesalahan sistem terlihat profesional dan selaras dengan tema aplikasi.
 - Redirection profil berjalan mulus tanpa kendala layar putih kosong.
+
+---
+
+## 4. Refactoring: Standardisasi Codebase dan Laravel Pint — 2 Juli 2026
+
+### Masalah Sebelum Perubahan
+1. Penulisan kode PHP di berbagai file controller, model, request, dan test masih bervariasi (tidak seragam dalam penggunaan spasi, tanda kurung, indentasi, pengurutan impor, dsb).
+2. Terdapat sisa-sisa state/variabel manual dismiss sesi aktif yang tidak terpakai pasca-implementasi sensor otomatis.
+
+### File yang Terlibat
+| Jalur File (File Path) | Peran Sebelum Perubahan | Peran Setelah Perubahan |
+| :--- | :--- | :--- |
+| `app/`, `database/`, `routes/`, `tests/` | Format berkas PHP bervariasi. | Format rapi seragam sesuai standar PSR-12 menggunakan Laravel Pint. |
+| `resources/js/Pages/` | Memiliki sisa variabel manual dismiss sesi aktif. | Kode bersih dari fungsi manual dismiss, full otomatis. |
+
+### Perubahan Kode
+- Mengatur gaya penulisan kode PHP secara otomatis menggunakan tool Laravel Pint.
+- Menghapus method `dismissSession` dan state `dismissedSessions` di seluruh file dashboard React/JSX.
+
+### Alasan Teknis
+Penyelarasan kualitas dan keterbacaan kode (*code readability*) di seluruh tim pengembang sesuai standar resmi ekosistem Laravel.
+
+### Dampak yang Dihasilkan
+- Riwayat git commit bersih dan konsisten.
+- Seluruh 99 tes berjalan sukses dengan format kode yang rapi.
+
