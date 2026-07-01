@@ -4,7 +4,7 @@ import StatusBadge from "@/Components/Shared/StatusBadge";
 import { Link, usePage } from "@inertiajs/react";
 import { useState } from "react";
 
-export default function Dashboard({ summary, orders, reservations }) {
+export default function Dashboard({ summary, orders, reservations, topMenuItems, peakHours }) {
     const { auth } = usePage().props;
     const ownerName = auth.user?.name || "Owner";
 
@@ -313,6 +313,244 @@ export default function Dashboard({ summary, orders, reservations }) {
                     </div>
                 </div>
 
+            </div>
+
+            {/* Grid for Pie Chart and Bar Chart */}
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* Pie Chart - Menu Terlaris */}
+                <div className="rounded-2xl border border-[#2b3232]/50 bg-gradient-to-b from-[#181d1d] to-[#111515] p-6 shadow-xl relative">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#222727] pb-4 gap-3">
+                        <div>
+                            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                                Menu Terlaris
+                            </h3>
+                            <p className="text-[10px] text-[#9aa7b3] mt-1">
+                                Top 5 item makanan & minuman berdasarkan jumlah pesanan
+                            </p>
+                        </div>
+                    </div>
+
+                    {topMenuItems && topMenuItems.length > 0 ? (() => {
+                        const PIE_COLORS = ['#ffcc00', '#22d3ee', '#a78bfa', '#f472b6', '#34d399'];
+                        const totalSold = topMenuItems.reduce((sum, item) => sum + Number(item.total_sold), 0);
+                        const RADIUS = 70;
+                        const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+                        let cumulativeOffset = 0;
+
+                        return (
+                            <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-8">
+                                {/* SVG Donut */}
+                                <div className="relative shrink-0">
+                                    <svg width="180" height="180" viewBox="0 0 200 200">
+                                        {/* Background circle */}
+                                        <circle cx="100" cy="100" r={RADIUS} fill="none" stroke="#222727" strokeWidth="28" />
+
+                                        {topMenuItems.map((item, index) => {
+                                            const fraction = Number(item.total_sold) / totalSold;
+                                            const dashLength = fraction * CIRCUMFERENCE;
+                                            const dashGap = CIRCUMFERENCE - dashLength;
+                                            const offset = -cumulativeOffset;
+                                            cumulativeOffset += dashLength;
+
+                                            return (
+                                                <circle
+                                                    key={index}
+                                                    cx="100"
+                                                    cy="100"
+                                                    r={RADIUS}
+                                                    fill="none"
+                                                    stroke={PIE_COLORS[index % PIE_COLORS.length]}
+                                                    strokeWidth="28"
+                                                    strokeDasharray={`${dashLength} ${dashGap}`}
+                                                    strokeDashoffset={offset}
+                                                    strokeLinecap="butt"
+                                                    transform="rotate(-90 100 100)"
+                                                    className="transition-all duration-700 ease-out hover:opacity-80"
+                                                    style={{ filter: `drop-shadow(0 0 4px ${PIE_COLORS[index % PIE_COLORS.length]}40)` }}
+                                                />
+                                            );
+                                        })}
+
+                                        {/* Center text */}
+                                        <text x="100" y="94" textAnchor="middle" className="fill-white text-xl font-black" style={{ fontSize: '22px' }}>
+                                            {totalSold}
+                                        </text>
+                                        <text x="100" y="114" textAnchor="middle" className="fill-[#9aa7b3]" style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                            Total Terjual
+                                        </text>
+                                    </svg>
+                                </div>
+
+                                {/* Legend */}
+                                <div className="flex-1 w-full space-y-2">
+                                    {topMenuItems.map((item, index) => {
+                                        const percentage = ((Number(item.total_sold) / totalSold) * 100).toFixed(1);
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="group flex items-center justify-between rounded-xl border border-[#222727]/50 bg-[#151919]/60 px-3.5 py-2.5 hover:border-[#3b4747] hover:bg-[#181d1d] transition-all duration-300"
+                                            >
+                                                <div className="flex items-center gap-2.5 truncate">
+                                                    <span
+                                                        className="h-2.5 w-2.5 rounded-full shrink-0 ring-2 ring-offset-1 ring-offset-[#111515]"
+                                                        style={{
+                                                            backgroundColor: PIE_COLORS[index % PIE_COLORS.length],
+                                                            ringColor: PIE_COLORS[index % PIE_COLORS.length],
+                                                        }}
+                                                    />
+                                                    <span className="text-[11px] font-bold text-white truncate max-w-[130px]">
+                                                        {item.menu_name}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    <span className="text-[9px] font-mono font-bold text-[#9aa7b3]">
+                                                        {item.total_sold} pcs
+                                                    </span>
+                                                    <span
+                                                        className="text-[9px] font-extrabold rounded-md px-1.5 py-0.5 border"
+                                                        style={{
+                                                            color: PIE_COLORS[index % PIE_COLORS.length],
+                                                            backgroundColor: `${PIE_COLORS[index % PIE_COLORS.length]}15`,
+                                                            borderColor: `${PIE_COLORS[index % PIE_COLORS.length]}30`,
+                                                        }}
+                                                    >
+                                                        {percentage}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })() : (
+                        <div className="mt-6 flex flex-col items-center justify-center py-12 text-center">
+                            <svg className="w-12 h-12 text-[#2b3232] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                            </svg>
+                            <p className="text-xs text-[#9aa7b3] italic">Belum ada data pesanan menu untuk ditampilkan</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Bar Chart - Jam Sibuk Billiard */}
+                <div className="rounded-2xl border border-[#2b3232]/50 bg-gradient-to-b from-[#181d1d] to-[#111515] p-6 shadow-xl relative">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#222727] pb-4 gap-3">
+                        <div>
+                            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#ffcc00]" />
+                                Jam Sibuk Billiard (Peak Hours)
+                            </h3>
+                            <p className="text-[10px] text-[#9aa7b3] mt-1">
+                                Frekuensi booking meja billiard berdasarkan jam mulai bermain
+                            </p>
+                        </div>
+                    </div>
+
+                    {peakHours && peakHours.length > 0 ? (() => {
+                        // Standard billiard hours 10:00 to 22:00
+                        const displayHours = Array.from({ length: 13 }, (_, i) => 10 + i);
+                        const hourData = displayHours.map((h) => {
+                            const dbRecord = peakHours.find((item) => Number(item.hour) === h);
+                            return {
+                                hour: h,
+                                count: dbRecord ? Number(dbRecord.count) : 0
+                            };
+                        });
+                        const maxCount = Math.max(...hourData.map((d) => d.count), 5);
+                        const chartHeight = 150;
+                        const chartWidth = 500;
+                        const paddingBottom = 25;
+                        const paddingTop = 20;
+                        const plotHeight = chartHeight - paddingTop - paddingBottom;
+
+                        return (
+                            <div className="mt-6">
+                                <div className="h-44 w-full relative">
+                                    <svg className="w-full h-full" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
+                                        {/* Horizontal Gridlines */}
+                                        {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+                                            const yPos = chartHeight - paddingBottom - (ratio * plotHeight);
+                                            return (
+                                                <g key={idx}>
+                                                    <line x1="0" y1={yPos} x2={chartWidth} y2={yPos} stroke="#222727" strokeDasharray={idx === 0 ? "0" : "6,6"} />
+                                                    {ratio > 0 && (
+                                                        <text x="5" y={yPos - 4} className="fill-[#5b6e6e] text-[8px] font-bold font-mono">
+                                                            {Math.round(ratio * maxCount)}
+                                                        </text>
+                                                    )}
+                                                </g>
+                                            );
+                                        })}
+
+                                        {/* Vertical Bars */}
+                                        {hourData.map((d, index) => {
+                                            const barWidth = 18;
+                                            const totalBars = hourData.length;
+                                            const step = chartWidth / totalBars;
+                                            const xPos = index * step + (step - barWidth) / 2;
+                                            const barHeight = (d.count / maxCount) * plotHeight;
+                                            const yPos = chartHeight - paddingBottom - barHeight;
+
+                                            const isPeak = d.count === Math.max(...hourData.map((x) => x.count)) && d.count > 0;
+
+                                            return (
+                                                <g key={index} className="group">
+                                                    {/* Bar */}
+                                                    <rect
+                                                        x={xPos}
+                                                        y={yPos}
+                                                        width={barWidth}
+                                                        height={Math.max(barHeight, 2)}
+                                                        rx="3"
+                                                        fill={d.count > 0 ? (isPeak ? '#ffcc00' : '#4f5e5e') : '#1c2222'}
+                                                        className="transition-all duration-300 hover:fill-[#ffd633] cursor-pointer"
+                                                        style={{ filter: isPeak ? 'drop-shadow(0 0 3px rgba(255, 204, 0, 0.3))' : 'none' }}
+                                                    />
+
+                                                    {/* Count Label on Hover */}
+                                                    {d.count > 0 && (
+                                                        <text
+                                                            x={xPos + barWidth / 2}
+                                                            y={yPos - 5}
+                                                            textAnchor="middle"
+                                                            className="fill-white text-[8px] font-black font-mono opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                                        >
+                                                            {d.count}
+                                                        </text>
+                                                    )}
+                                                </g>
+                                            );
+                                        })}
+                                    </svg>
+                                </div>
+
+                                {/* X-axis Labels */}
+                                <div className="mt-2 flex justify-between text-[9px] font-bold font-mono text-[#9aa7b3] px-1">
+                                    {hourData.map((d, idx) => {
+                                        const label = `${d.hour.toString().padStart(2, '0')}:00`;
+                                        return (
+                                            <span key={idx} className={idx % 2 === 0 ? "" : "hidden sm:inline"}>
+                                                {label}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })() : (
+                        <div className="mt-6 flex flex-col items-center justify-center py-12 text-center">
+                            <svg className="w-12 h-12 text-[#2b3232] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p className="text-xs text-[#9aa7b3] italic">Belum ada data reservasi untuk dianalisis</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Latest Activities Section with Tabs */}
