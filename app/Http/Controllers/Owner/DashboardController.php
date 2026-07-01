@@ -27,6 +27,10 @@ class DashboardController extends Controller
                 ->orderByDesc('total_sold')
                 ->take(5)
                 ->get(),
+            'peakHours' => Reservation::select(DB::raw('HOUR(start_time) as hour'), DB::raw('COUNT(*) as count'))
+                ->groupBy('hour')
+                ->orderBy('hour')
+                ->get(),
         ]);
     }
 }
